@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titre %}Vos données{% endblock %}
+{% block classe_page %}etroit{% endblock %}
+{% block contenu %}
+<div class="feuille">
+  <p class="sur-titre">Information des salariés</p>
+  <h1>Badgeage et protection de vos données</h1>
+  <h2>Ce que fait l'application</h2>
+  <p>Lorsque vous badgez, votre appareil transmet une position au serveur. Le serveur vérifie si cette position se trouve
+    à moins de {{ regles.rayon_defaut_m }} m environ (rayon paramétré pour chaque lieu) d'un lieu de travail autorisé : un établissement Proximy ou votre domicile déclaré
+    si vous êtes autorisé au télétravail.</p>
+  <h2>Ce qui est enregistré</h2>
+  <ul>
+    <li>la date et l'heure du badgeage, et s'il s'agit d'une arrivée ou d'un départ ;</li>
+    <li>le résultat du contrôle : « dans la zone », « hors zone », « indéterminé » (position trop imprécise) ou « position refusée » ;</li>
+    <li>le type d'appareil (smartphone ou ordinateur) et la précision annoncée par l'appareil, en mètres ;</li>
+    <li>pour une saisie manuelle : le motif indiqué.</li>
+  </ul>
+  <h2>Ce qui n'est jamais enregistré</h2>
+  <p class="lecture">Vos coordonnées GPS. Elles servent au calcul puis sont immédiatement oubliées. Aucun suivi de vos déplacements n'est réalisé : la position n'est demandée qu'au moment où vous appuyez sur le bouton.</p>
+  <h2>Qui voit vos badgeages</h2>
+  <p>Vous-même, votre manager{% if regles.perimetre_manager_niveaux > 1 %} et son propre manager{% endif %}, le service RH et les administrateurs de l'application. Toute correction est tracée (auteur, date, valeur avant et après).</p>
+  <h2>Durée de conservation</h2>
+  <p>Les badgeages sont conservés {{ regles.retention_pointages_mois }} mois. Après votre départ de l'entreprise, votre compte et vos badgeages sont supprimés au bout de {{ regles.retention_comptes_sortis_mois }} mois.</p>
+  <h2>Vos droits</h2>
+  <p>Vous pouvez consulter vos badgeages à tout moment dans « Mes badgeages ». Pour exercer vos droits d'accès et de rectification, adressez-vous au service RH.</p>
+  <p class="discret">Si vous refusez la géolocalisation, le badgeage est tout de même enregistré, avec la mention « position refusée ».</p>
+</div>
+{% endblock %}

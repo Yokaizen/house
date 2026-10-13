@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titre %}Utilisateurs{% endblock %}
+{% block contenu %}
+{% include "admin/_nav.html" %}
+<div class="actions" style="justify-content:space-between;margin-bottom:12px">
+  <h1 style="margin:0">Utilisateurs</h1>
+  <a class="bouton" href="/admin/utilisateurs/nouveau">Ajouter un utilisateur</a>
+</div>
+<form class="feuille filtres" method="get">
+  <div class="champ"><label for="q">Recherche</label><input type="search" id="q" name="q" value="{{ f.q }}" placeholder="Nom, matricule, e-mail"></div>
+  <div class="champ"><label for="etablissement">Établissement</label><select id="etablissement" name="etablissement"><option value="">Tous</option>
+    {% for e in etablissements %}<option value="{{ e.id }}" {{ 'selected' if f.etablissement == e.id|string }}>{{ e.nom }}</option>{% endfor %}</select></div>
+  <div class="champ"><label for="role">Rôle</label><select id="role" name="role"><option value="">Tous</option>
+    {% for r in ROLES %}<option value="{{ r }}" {{ 'selected' if f.role == r }}>{{ ROLE_LIBELLES[r] }}</option>{% endfor %}</select></div>
+  <div class="champ"><label for="statut">Statut</label><select id="statut" name="statut">
+    {% for v, lib in [('actifs', 'Actifs'), ('inactifs', 'Inactifs'), ('tous', 'Tous')] %}<option value="{{ v }}" {{ 'selected' if f.statut == v }}>{{ lib }}</option>{% endfor %}</select></div>
+  <div class="champ" style="flex:0"><button class="bouton">Filtrer</button></div>
+</form>
+<div class="feuille defilant">
+<table>
+  <thead><tr><th>Matricule</th><th>Nom</th><th>Rôle</th><th>Établissement</th><th>Manager</th><th>Domicile</th><th>Dernière connexion</th></tr></thead>
+  <tbody>
+  {% for x in utilisateurs %}
+  <tr>
+    <td>{{ x.matricule }}</td>
+    <td class="nom"><a href="/admin/utilisateurs/{{ x.id }}"><strong>{{ x.nom }} {{ x.prenom }}</strong></a>{% if not x.actif %} <span class="pastille">Inactif</span>{% endif %}</td>
+    <td>{{ ROLE_LIBELLES[x.role] }}</td>
+    <td>{{ x.etablissement.nom if x.etablissement else '–' }}</td>
+    <td>{{ x.manager.nom_complet if x.manager else '–' }}</td>
+    <td>{% if not x.teletravail_autorise %}<span class="discret">Sans télétravail</span>{% elif x.domicile_localise %}<span class="pastille dans_zone">Localisé</span>{% else %}<span class="pastille indetermine">À localiser</span>{% endif %}</td>
+    <td>{{ x.derniere_connexion|date_fr if x.derniere_connexion else 'Jamais' }}</td>
+  </tr>
+  {% else %}<tr class="vide"><td colspan="7">Aucun utilisateur.</td></tr>{% endfor %}
+  </tbody>
+</table>
+<p class="discret">{{ utilisateurs|length }} utilisateur(s).</p>
+</div>
+{% endblock %}

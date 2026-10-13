@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titre %}Mot de passe{% endblock %}
+{% block classe_page %}etroit{% endblock %}
+{% block contenu %}
+<div class="feuille">
+  <h1>{{ 'Choisissez votre mot de passe' if impose else 'Changer mon mot de passe' }}</h1>
+  {% if impose %}<p class="lecture">Pour votre première connexion, remplacez le mot de passe provisoire par un mot de passe personnel.</p>{% endif %}
+  {% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  <form method="post" action="/mot-de-passe">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="champ"><label for="actuel">Mot de passe actuel{% if impose %} (provisoire){% endif %}</label>
+      <input id="actuel" name="actuel" type="password" autocomplete="current-password" required></div>
+    <div class="champ"><label for="nouveau">Nouveau mot de passe <span class="aide">10 caractères minimum, avec au moins une lettre et un chiffre.</span></label>
+      <input id="nouveau" name="nouveau" type="password" autocomplete="new-password" minlength="10" required></div>
+    <div class="champ"><label for="confirmation">Confirmation</label>
+      <input id="confirmation" name="confirmation" type="password" autocomplete="new-password" minlength="10" required></div>
+    <button class="bouton" type="submit">Enregistrer</button>
+  </form>
+  {% if impose %}
+  <form method="post" action="/deconnexion" style="margin-top:12px">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <button class="bouton lien-simple">Se déconnecter</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

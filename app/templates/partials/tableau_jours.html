@@ -1,0 +1,33 @@
+{# Tableau jour par jour. Variables : jours, s ; facultatives : corriger, valider, retour, csrf. #}
+{% from "partials/macros.html" import badgeage, alertes %}
+{% set semaines = {} %}{% for sem in s.semaines() %}{% set _ = semaines.update({(sem.annee, sem.numero): sem}) %}{% endfor %}
+<table>
+  <thead><tr><th>Jour</th><th>Arrivée</th><th>Départ</th><th class="num">Durée</th><th>Alertes</th>{% if corriger or valider %}<th>Actions</th>{% endif %}</tr></thead>
+  <tbody>
+  {% for jour, j in jours %}
+    {% set cle = jour.isocalendar()[:2] %}
+    {% if (jour.weekday() == 6 or loop.first) and cle in semaines %}
+      {% set sem = semaines[cle] %}
+      <tr class="semaine"><td colspan="3">Semaine {{ sem.numero }}</td><td class="num">{{ sem.duree|duree }}</td>
+        <td colspan="{{ 2 if corriger or valider else 1 }}">Contrat {{ sem.contrat|duree }} {{ alertes(sem.alertes) }}</td></tr>
+    {% endif %}
+    {% if j and j.postes %}
+      {% for poste in j.postes %}
+      <tr class="{{ 'weekend' if jour.weekday() >= 5 }}">
+        <td class="nom">{% if loop.first %}{{ jour|date_fr(true) }}{% endif %}</td>
+        <td>{{ badgeage(poste.entree, true) }}{% if poste.entree and poste.entree.horodatage|date_fr != jour|date_fr %} <span class="discret">({{ poste.entree.horodatage|date_fr }})</span>{% endif %}</td>
+        <td>{{ badgeage(poste.sortie, true) }}{% if poste.sortie and poste.sortie.horodatage|date_fr != jour|date_fr %} <span class="discret">(le {{ poste.sortie.horodatage|date_fr }})</span>{% endif %}
+          {% if poste.en_cours %}<span class="pastille info">En cours</span>{% endif %}</td>
+        <td class="num">{{ poste.duree|duree if poste.duree else '–' }}</td>
+        <td>{% if loop.first %}{{ alertes(j.alertes) }}{% if 'repos' in j.alertes %}<div class="discret">Repos précédent : {{ j.repos_avant|duree }}</div>{% endif %}{% endif %}</td>
+        {% if corriger or valider %}
+        <td>{% for p in poste.pointages %}{% include "partials/correction.html" %}{% endfor %}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr class="vide {{ 'weekend' if jour.weekday() >= 5 }}"><td>{{ jour|date_fr(true) }}</td><td colspan="{{ 5 if corriger or valider else 4 }}">–</td></tr>
+    {% endif %}
+  {% endfor %}
+  </tbody>
+</table>

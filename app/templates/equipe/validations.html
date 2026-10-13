@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titre %}Saisies à valider{% endblock %}
+{% block contenu %}
+<h1>Saisies manuelles à valider</h1>
+{% if not actif %}<p class="lecture">La validation des saisies manuelles n'est pas activée : les saisies sont prises en compte directement. Un administrateur peut l'activer dans les paramètres.</p>{% endif %}
+<div class="feuille defilant">
+<table>
+  <thead><tr><th>Collaborateur</th><th>Badgeage déclaré</th><th>Saisi le</th><th>Motif</th><th>Décision</th></tr></thead>
+  <tbody>
+  {% for p in saisies %}
+  <tr>
+    <td class="nom"><a href="/equipe/{{ p.utilisateur.id }}">{{ p.utilisateur.nom_complet }}</a></td>
+    <td>{{ 'Arrivée' if p.type == 'entree' else 'Départ' }} le {{ p.horodatage|date_fr(true) }} à {{ p.horodatage|heure }}</td>
+    <td>{{ p.saisi_le|date_fr }} {{ p.saisi_le|heure }}</td>
+    <td>{{ p.motif }}</td>
+    <td><form method="post" action="/pointages/{{ p.id }}/valider" class="actions">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <input type="text" name="commentaire" placeholder="Commentaire" style="max-width:180px">
+      <button class="bouton petit" name="decision" value="valider">Valider</button>
+      <button class="bouton petit rose" name="decision" value="refuser">Refuser</button>
+    </form></td>
+  </tr>
+  {% else %}
+  <tr class="vide"><td colspan="5">Aucune saisie en attente.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

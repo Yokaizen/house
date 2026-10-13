@@ -1,0 +1,6 @@
+{# Carte Leaflet pour positionner un lieu. Variables : id_lat, id_lon, id_rayon. #}
+<div id="carte" class="carte-geo" aria-label="Carte : cliquez pour placer le lieu"></div>
+<p class="discret">Cliquez sur la carte ou déplacez le repère pour ajuster la position. Le cercle montre la zone de tolérance.</p>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="/static/js/carte.js?v=1" data-lat="{{ id_lat }}" data-lon="{{ id_lon }}" data-rayon="{{ id_rayon }}" data-rayon-defaut="{{ rayon_defaut }}"></script>

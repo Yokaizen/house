@@ -1,0 +1,185 @@
+/* Charte Proximy : marine #061E66, violet #4B4584, framboise #E80A65. */
+:root {
+  --marine: #061E66;
+  --violet: #4B4584;
+  --rose: #E80A65;
+  --encre: #3A3F4B;
+  --fond: #EEF2F7;
+  --feuille: #FFFFFF;
+  --carte: #F2F4F8;
+  --filet: #E2E6EF;
+  --platine: #E9E9FF;
+  --gris-1: #555B6A;
+  --gris-3: #6B7180;
+  --gris-5: #8A90A0;
+  --rayon: 14px;
+  --police: "Century Gothic", CenturyGothic, "URW Gothic L", "URW Gothic", AppleGothic, "Avenir Next", Avenir, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--police);
+  font-size: 15px;
+  line-height: 1.5;
+}
+a { color: var(--marine); }
+h1, h2, h3 { color: var(--marine); line-height: 1.2; margin: 0 0 .6em; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1rem; }
+p { margin: 0 0 .8em; }
+.discret { color: var(--gris-3); font-size: .9em; }
+.sur-titre { color: var(--gris-5); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
+
+/* --- En-tête ---------------------------------------------------------- */
+.entete {
+  background: var(--feuille);
+  border-bottom: 3px solid var(--rose);
+  position: sticky; top: 0; z-index: 10;
+}
+.entete-contenu {
+  max-width: 1200px; margin: 0 auto; padding: 10px 16px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.logo {
+  font-weight: 700; font-size: 1.45rem; letter-spacing: .04em; text-decoration: none;
+  display: inline-flex; align-items: baseline;
+}
+.logo .proxi { color: var(--rose); }
+.logo .my { color: var(--marine); }
+.logo small { color: var(--gris-3); font-weight: 400; font-size: .8rem; margin-left: 10px; letter-spacing: 0; }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; align-items: center; }
+.nav a, .nav button.lien {
+  color: var(--marine); text-decoration: none; padding: 6px 10px; border-radius: 999px; font-size: .92rem;
+}
+.nav a:hover, .nav a.actif { background: var(--platine); }
+.nav .admin { color: var(--violet); }
+.nav form { margin: 0; }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 20px 16px 60px; }
+.etroit { max-width: 560px; }
+
+/* --- Blocs ------------------------------------------------------------ */
+.feuille {
+  background: var(--feuille); border-radius: var(--rayon); padding: 20px;
+  box-shadow: 0 1px 2px rgba(6, 30, 102, .06); margin-bottom: 18px;
+}
+.carte { background: var(--carte); border-radius: var(--rayon); padding: 14px 16px; }
+.grille { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.chiffre { font-size: 1.6rem; font-weight: 700; color: var(--marine); display: block; }
+.chiffre.rose { color: var(--rose); }
+.lecture { border-left: 4px solid var(--rose); background: var(--carte); padding: 10px 14px; border-radius: 0 10px 10px 0; }
+
+.flash { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; }
+.flash.ok { background: var(--platine); color: var(--marine); border-left: 4px solid var(--marine); }
+.flash.erreur { background: #FDE7F0; color: var(--marine); border-left: 4px solid var(--rose); }
+.erreurs { background: #FDE7F0; border-left: 4px solid var(--rose); padding: 10px 14px 10px 30px; border-radius: 0 10px 10px 0; }
+
+/* --- Badgeage --------------------------------------------------------- */
+.badgeage { text-align: center; padding: 28px 20px; }
+.horloge { font-size: 3rem; font-weight: 700; color: var(--marine); letter-spacing: .02em; }
+.date-jour { color: var(--gris-3); margin-bottom: 24px; }
+.bouton-badge {
+  display: block; width: 100%; max-width: 360px; margin: 0 auto;
+  border: 0; border-radius: 999px; padding: 22px 20px; cursor: pointer;
+  font: 700 1.25rem var(--police); color: #fff; background: var(--marine);
+  box-shadow: 0 6px 18px rgba(6, 30, 102, .25);
+}
+.bouton-badge.sortie { background: var(--rose); box-shadow: 0 6px 18px rgba(232, 10, 101, .3); }
+.bouton-badge:disabled { opacity: .6; cursor: wait; }
+.statut-badge { margin-top: 18px; min-height: 1.5em; color: var(--gris-1); }
+.resultat { margin-top: 18px; }
+.lien-oubli { display: inline-block; margin-top: 22px; color: var(--violet); }
+
+/* --- Pastilles -------------------------------------------------------- */
+.pastille {
+  display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: .78rem; white-space: nowrap;
+  background: var(--carte); color: var(--gris-1); border: 1px solid var(--filet);
+}
+.pastille.dans_zone { background: var(--platine); color: var(--marine); border-color: var(--platine); }
+.pastille.hors_zone { background: var(--rose); color: #fff; border-color: var(--rose); }
+.pastille.indetermine { background: #fff; color: var(--violet); border-color: var(--violet); }
+.pastille.indisponible { background: #fff; color: var(--gris-3); border-color: var(--gris-5); border-style: dashed; }
+.pastille.manuel { background: #fff; color: var(--rose); border: 1px dashed var(--rose); }
+.pastille.correction { background: #fff; color: var(--violet); border: 1px dashed var(--violet); }
+.pastille.attente { background: var(--violet); color: #fff; border-color: var(--violet); }
+.pastille.grave { background: #FDE7F0; color: var(--rose); border-color: #F9C6DB; }
+.pastille.info { background: var(--carte); color: var(--gris-3); }
+.heure-manuelle { border-bottom: 2px dashed var(--rose); }
+
+/* --- Tableaux --------------------------------------------------------- */
+.defilant { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th {
+  background: var(--marine); color: #fff; text-align: left; font-weight: 600;
+  padding: 9px 10px; white-space: nowrap; font-size: .85rem;
+}
+th:first-child { border-top-left-radius: 10px; }
+th:last-child { border-top-right-radius: 10px; }
+td { padding: 8px 10px; border-bottom: 1px solid var(--filet); vertical-align: top; color: var(--violet); }
+td.nom, td strong { color: var(--marine); }
+tr:nth-child(even) td { background: #FAFBFD; }
+tr.weekend td { background: var(--carte); }
+tr.vide td { color: var(--gris-5); }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.negatif { color: var(--rose); font-weight: 600; }
+.semaine td { background: var(--platine) !important; color: var(--marine); font-weight: 600; }
+
+/* --- Formulaires ------------------------------------------------------ */
+label { display: block; font-weight: 600; color: var(--marine); margin-bottom: 4px; font-size: .9rem; }
+.aide { display: block; font-weight: 400; color: var(--gris-3); font-size: .82rem; margin-top: 2px; }
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=date],
+input[type=time], input[type=search], select, textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--filet); border-radius: 10px;
+  font: inherit; color: var(--encre); background: #fff;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--violet); outline-offset: 1px; }
+textarea { min-height: 80px; }
+.champ { margin-bottom: 14px; }
+.case { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; color: var(--encre); }
+.case input { margin-top: 4px; }
+.ligne-champs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.filtres { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.filtres .champ { margin: 0; min-width: 150px; flex: 1; }
+.choix { display: flex; gap: 8px; flex-wrap: wrap; }
+.choix label { font-weight: 400; display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+  border: 1px solid var(--filet); border-radius: 999px; cursor: pointer; color: var(--encre); }
+.choix input:checked + span { color: var(--marine); font-weight: 700; }
+
+.bouton {
+  display: inline-block; border: 0; border-radius: 999px; padding: 10px 20px; cursor: pointer;
+  font: 600 .95rem var(--police); background: var(--marine); color: #fff; text-decoration: none;
+}
+.bouton.secondaire { background: #fff; color: var(--marine); border: 1px solid var(--marine); }
+.bouton.rose { background: var(--rose); }
+.bouton.petit { padding: 5px 12px; font-size: .82rem; }
+.bouton.lien-simple { background: none; color: var(--marine); padding: 0; text-decoration: underline; }
+button.lien { background: none; border: 0; font: inherit; cursor: pointer; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+details.correction summary { cursor: pointer; color: var(--violet); font-size: .85rem; }
+details.correction form { background: var(--carte); padding: 10px; border-radius: 10px; margin-top: 6px; min-width: 260px; }
+details.correction .champ { margin-bottom: 8px; }
+
+.carte-geo { height: 300px; border-radius: var(--rayon); margin-bottom: 14px; border: 1px solid var(--filet); }
+.mdp-provisoire { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.4rem; color: var(--marine);
+  background: var(--platine); padding: 10px 16px; border-radius: 10px; display: inline-block; letter-spacing: .08em; }
+.pied { text-align: center; color: var(--gris-5); font-size: .8rem; padding: 20px; }
+.pied a { color: var(--gris-3); }
+
+@media (max-width: 640px) {
+  .logo small { display: none; }
+  .nav { margin-left: 0; width: 100%; }
+  .horloge { font-size: 2.4rem; }
+  h1 { font-size: 1.35rem; }
+  .feuille { padding: 16px; }
+  .masque-mobile { display: none; }
+}
+@media print {
+  .entete, .filtres, .actions, details.correction { display: none !important; }
+  body { background: #fff; }
+}

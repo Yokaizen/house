@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titre %}Badgeage oublié{% endblock %}
+{% block classe_page %}etroit{% endblock %}
+{% block contenu %}
+{% set v = valeurs or {} %}
+<div class="feuille">
+  <p class="sur-titre">Saisie manuelle</p>
+  <h1>J'ai oublié de badger</h1>
+  <p class="lecture">Cette saisie sera identifiée comme <strong>manuelle</strong> et visible comme telle par votre manager.
+    {% if validation %}Elle sera prise en compte après sa validation.{% endif %}
+    Vous pouvez saisir un oubli datant de {{ jours_max }} jours au plus.</p>
+  {% if erreur %}<div class="flash erreur" role="alert">{{ erreur }}</div>{% endif %}
+  <form method="post" action="/oubli">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="champ">
+      <label>J'ai oublié de badger mon…</label>
+      <div class="choix">
+        <label><input type="radio" name="type" value="entree" {{ 'checked' if v.get('type', 'entree') == 'entree' }}><span>Arrivée</span></label>
+        <label><input type="radio" name="type" value="sortie" {{ 'checked' if v.get('type') == 'sortie' }}><span>Départ</span></label>
+      </div>
+    </div>
+    <div class="ligne-champs">
+      <div class="champ"><label for="jour">Date</label>
+        <input type="date" id="jour" name="jour" max="{{ aujourdhui }}" value="{{ v.get('jour', aujourdhui) }}" required></div>
+      <div class="champ"><label for="heure">Heure</label>
+        <input type="time" id="heure" name="heure" value="{{ v.get('heure', '') }}" required></div>
+    </div>
+    <div class="champ"><label for="motif">Motif <span class="aide">Obligatoire. Exemple : téléphone déchargé, oubli.</span></label>
+      <textarea id="motif" name="motif" required minlength="3" maxlength="1000">{{ v.get('motif', '') }}</textarea></div>
+    <div class="actions"><button class="bouton" type="submit">Enregistrer la saisie</button><a href="/">Annuler</a></div>
+  </form>
+</div>
+{% endblock %}

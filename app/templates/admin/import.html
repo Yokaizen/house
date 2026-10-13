@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titre %}Import CSV{% endblock %}
+{% block contenu %}
+{% include "admin/_nav.html" %}
+<h1>Import des utilisateurs</h1>
+{% if erreur %}<div class="flash erreur">{{ erreur }}</div>{% endif %}
+{% if rapport %}
+<div class="feuille">
+  <h2>Résultat de l'import</h2>
+  <div class="grille" style="margin-bottom:14px">
+    <div class="carte"><span class="sur-titre">Créés</span><span class="chiffre">{{ rapport.crees }}</span></div>
+    <div class="carte"><span class="sur-titre">Mis à jour</span><span class="chiffre">{{ rapport.mis_a_jour }}</span></div>
+    <div class="carte"><span class="sur-titre">Lignes en erreur</span><span class="chiffre {{ 'rose' if rapport.erreurs }}">{{ rapport.erreurs|length }}</span></div>
+  </div>
+  {% if rapport.erreurs %}<h3>Erreurs (lignes non importées)</h3><ul class="erreurs">{% for e in rapport.erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  {% if rapport.avertissements %}<h3>Avertissements</h3><ul>{% for e in rapport.avertissements %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  {% if rapport.identifiants %}
+  <h3>Mots de passe provisoires des comptes créés</h3>
+  <p class="lecture">Ces mots de passe ne seront plus affichés. Copiez-les maintenant pour les transmettre. Chacun devra être changé à la première connexion.</p>
+  <div class="defilant"><table id="identifiants">
+    <thead><tr><th>Matricule</th><th>Nom</th><th>Mot de passe provisoire</th></tr></thead>
+    <tbody>{% for m, n, p in rapport.identifiants %}<tr><td>{{ m }}</td><td class="nom">{{ n }}</td><td><code>{{ p }}</code></td></tr>{% endfor %}</tbody>
+  </table></div>
+  <p><button type="button" class="bouton secondaire petit" onclick="navigator.clipboard.writeText(Array.from(document.querySelectorAll('#identifiants tr')).map(function(r){return Array.from(r.cells).map(function(c){return c.innerText}).join(';')}).join('\n'))">Copier le tableau</button></p>
+  {% endif %}
+</div>
+{% endif %}
+<div class="feuille">
+  <form method="post" action="/admin/import" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="champ"><label for="fichier">Fichier CSV</label><input type="file" id="fichier" name="fichier" accept=".csv,text/csv" required></div>
+    <label class="case champ"><input type="checkbox" name="geocoder_adresses" checked><span>Localiser automatiquement les adresses de domicile</span></label>
+    <button class="bouton">Importer</button>
+  </form>
+</div>
+<div class="feuille">
+  <h2>Format attendu</h2>
+  <p>Séparateur point-virgule (ou virgule), encodage UTF-8 ou « CSV Windows ». Une ligne par utilisateur, identifié par son matricule : une ligne existante est mise à jour, une nouvelle est créée.</p>
+  <p><a class="bouton secondaire petit" href="/admin/import/modele.csv">Télécharger le modèle</a></p>
+  <div class="defilant"><table>
+    <thead><tr><th>Colonne</th><th>Contenu</th></tr></thead>
+    <tbody>
+      <tr><td>matricule</td><td>Obligatoire. Sert d'identifiant de connexion.</td></tr>
+      <tr><td>nom, prenom</td><td>Obligatoires.</td></tr>
+      <tr><td>email</td><td>Facultatif. Permet aussi de se connecter et de recevoir les notifications.</td></tr>
+      <tr><td>etablissement</td><td>Code ou nom d'un établissement existant.</td></tr>
+      <tr><td>matricule_manager</td><td>Matricule du manager (peut figurer plus bas dans le fichier).</td></tr>
+      <tr><td>role</td><td>salarie, manager, rh ou admin (salarie par défaut).</td></tr>
+      <tr><td>heures_hebdo</td><td>Durée contractuelle hebdomadaire, ex. 35 ou 24,5.</td></tr>
+      <tr><td>teletravail</td><td>oui / non : autorise le badgeage depuis le domicile.</td></tr>
+      <tr><td>adresse_numero, adresse_voie, adresse_complement, code_postal, ville</td><td>Adresse du domicile.</td></tr>
+      <tr><td>date_sortie</td><td>JJ/MM/AAAA. Désactive le compte après cette date.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="discret">Une colonne absente du fichier ne modifie pas la valeur existante. Une colonne présente mais vide efface la valeur.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import filtre_periode %}
+{% block titre %}{{ cible.nom_complet }}{% endblock %}
+{% block contenu %}
+<p><a href="/equipe?{{ retour }}">← Retour au suivi</a></p>
+<div class="actions" style="justify-content:space-between;margin-bottom:8px">
+  <div>
+    <p class="sur-titre">{{ cible.matricule }}{% if cible.etablissement %} · {{ cible.etablissement.nom }}{% endif %}{% if cible.manager %} · manager : {{ cible.manager.nom_complet }}{% endif %}</p>
+    <h1 style="margin:0">{{ cible.prenom }} {{ cible.nom }}{% if not cible.actif %} <span class="pastille">Inactif</span>{% endif %}</h1>
+  </div>
+  {% if moi.est_admin %}<a class="bouton secondaire petit" href="/admin/utilisateurs/{{ cible.id }}">Fiche utilisateur</a>{% endif %}
+</div>
+
+<form class="feuille filtres" method="get">
+  {{ filtre_periode(f, PERIODES) }}
+  <div class="champ" style="flex:0"><button class="bouton" type="submit">Afficher</button></div>
+</form>
+
+{% include "partials/chiffres.html" %}
+
+<div class="feuille">
+  <h2>Détail par journée</h2>
+  <p class="discret">Les heures soulignées en pointillé ont été saisies manuellement. Un poste de nuit est rattaché au jour de l'arrivée.</p>
+  <div class="defilant">{% include "partials/tableau_jours.html" %}</div>
+</div>
+
+{% if corriger %}
+<div class="feuille etroit">
+  <h2>Ajouter un badgeage</h2>
+  <form method="post" action="/equipe/{{ cible.id }}/ajout">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="retour" value="{{ retour }}">
+    <div class="ligne-champs">
+      <div class="champ"><label for="type">Type</label><select id="type" name="type"><option value="entree">Arrivée</option><option value="sortie">Départ</option></select></div>
+      <div class="champ"><label for="jour">Date</label><input type="date" id="jour" name="jour" max="{{ aujourdhui }}" required></div>
+      <div class="champ"><label for="heure">Heure</label><input type="time" id="heure" name="heure" required></div>
+    </div>
+    <div class="champ"><label for="motif">Motif</label><input type="text" id="motif" name="motif" required minlength="3"></div>
+    <button class="bouton">Ajouter</button>
+    <p class="discret">Le badgeage sera marqué « Correction » et tracé dans le journal d'audit.</p>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

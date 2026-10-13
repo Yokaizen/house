@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import badgeage %}
+{% block titre %}Badger{% endblock %}
+{% block classe_page %}etroit{% endblock %}
+{% block contenu %}
+<div class="feuille badgeage">
+  <p class="sur-titre">Bonjour {{ moi.prenom }}</p>
+  <div class="horloge" id="horloge">--:--</div>
+  <div class="date-jour" id="date-jour"></div>
+
+  {% if etat.prochain %}
+  <button id="bouton-badge" class="bouton-badge {{ etat.prochain }}" data-type="{{ etat.prochain }}">
+    {{ 'Badger mon arrivée' if etat.prochain == 'entree' else 'Badger mon départ' }}
+  </button>
+  {% if etat.prochain == 'sortie' and etat.dernier %}
+  <p class="discret" style="margin-top:12px">Arrivée badgée le {{ etat.dernier.horodatage|date_fr }} à {{ etat.dernier.horodatage|heure }}</p>
+  {% endif %}
+  {% else %}
+  <div class="lecture" style="text-align:left">Votre journée est terminée : arrivée et départ sont enregistrés.</div>
+  {% endif %}
+  <div class="statut-badge" id="statut" role="status" aria-live="polite"></div>
+
+  {% if sans_lieu %}
+  <p class="discret">Aucun lieu de travail n'est encore paramétré pour vous : vos badgeages seront enregistrés comme « Indéterminé ».</p>
+  {% endif %}
+
+  <a class="lien-oubli" href="/oubli">J'ai oublié de badger mon arrivée ou mon départ</a>
+</div>
+
+{% if journee and journee.postes %}
+<div class="feuille">
+  <h2>Aujourd'hui</h2>
+  {% for poste in journee.postes %}
+  <p>Arrivée : {{ badgeage(poste.entree) }}<br>Départ : {{ badgeage(poste.sortie) }}
+  {% if poste.duree %}<br><span class="discret">Durée : {{ poste.duree|duree }}</span>{% endif %}</p>
+  {% endfor %}
+</div>
+{% endif %}
+
+<p class="discret" style="text-align:center">Votre position sert uniquement à vérifier que vous êtes sur un lieu de travail autorisé. Elle n'est pas enregistrée. <a href="/confidentialite">En savoir plus</a></p>
+{% endblock %}
+{% block scripts %}
+<script>window.CSRF = {{ csrf|tojson }}; window.FUSEAU = {{ fuseau|tojson }};</script>
+<script src="/static/js/badge.js?v=2"></script>
+{% endblock %}

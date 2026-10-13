@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titre %}{{ etab.nom if etab else 'Nouvel établissement' }}{% endblock %}
+{% block contenu %}
+{% include "admin/_nav.html" %}
+{% set v = valeurs or {} %}
+{% macro val(champ, defaut='') %}{{ v[champ] if champ in v else (etab[champ] if etab and etab[champ] is not none else defaut) }}{% endmacro %}
+<p><a href="/admin/etablissements">← Établissements</a></p>
+<h1>{{ etab.nom if etab else 'Nouvel établissement' }}</h1>
+{% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+<form method="post" action="/admin/etablissements/enregistrer" class="feuille">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  {% if etab %}<input type="hidden" name="id" value="{{ etab.id }}">{% endif %}
+  <div class="ligne-champs">
+    <div class="champ"><label for="code">Code <span class="aide">Utilisé dans l'import CSV, ex. STAINS.</span></label><input type="text" id="code" name="code" value="{{ val('code') }}" required></div>
+    <div class="champ"><label for="nom">Nom</label><input type="text" id="nom" name="nom" value="{{ val('nom') }}" required></div>
+    <div class="champ"><label for="rayon_m">Rayon de tolérance (m)</label><input type="number" id="rayon_m" name="rayon_m" min="20" max="5000" value="{{ val('rayon_m', rayon_defaut) }}" required></div>
+  </div>
+  <div class="ligne-champs">
+    <div class="champ"><label for="adresse_numero">N°</label><input type="text" id="adresse_numero" name="adresse_numero" value="{{ val('adresse_numero') }}"></div>
+    <div class="champ" style="grid-column: span 2"><label for="adresse_voie">Voie</label><input type="text" id="adresse_voie" name="adresse_voie" value="{{ val('adresse_voie') }}"></div>
+    <div class="champ"><label for="adresse_complement">Complément</label><input type="text" id="adresse_complement" name="adresse_complement" value="{{ val('adresse_complement') }}"></div>
+  </div>
+  <div class="ligne-champs">
+    <div class="champ"><label for="code_postal">Code postal</label><input type="text" id="code_postal" name="code_postal" value="{{ val('code_postal') }}"></div>
+    <div class="champ"><label for="ville">Ville</label><input type="text" id="ville" name="ville" value="{{ val('ville') }}"></div>
+    <div class="champ"><label>&nbsp;</label><button type="button" class="bouton secondaire" id="geocoder">Localiser l'adresse</button></div>
+  </div>
+  <p class="discret" id="geocodage-resultat"></p>
+  <div class="ligne-champs">
+    <div class="champ"><label for="latitude">Latitude</label><input type="text" id="latitude" name="latitude" value="{{ val('latitude') }}"></div>
+    <div class="champ"><label for="longitude">Longitude</label><input type="text" id="longitude" name="longitude" value="{{ val('longitude') }}"></div>
+  </div>
+  {% with id_lat='latitude', id_lon='longitude', id_rayon='rayon_m' %}{% include "admin/_carte.html" %}{% endwith %}
+  <label class="case champ"><input type="checkbox" name="actif" {{ 'checked' if (v.get('actif') == 'on') or (not v and (not etab or etab.actif)) }}><span>Établissement actif</span></label>
+  <button class="bouton" type="submit">Enregistrer</button>
+</form>
+{% endblock %}

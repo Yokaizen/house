@@ -1,0 +1,65 @@
+# Badgeage Proximy : application, tâches planifiées, base PostgreSQL et Nginx (HTTPS).
+# Démarrage : cp .env.example .env (puis l'éditer) ; placer le certificat dans nginx/certs ;
+#             docker compose up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: badgeage
+      POSTGRES_USER: badgeage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Renseignez POSTGRES_PASSWORD dans .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U badgeage -d badgeage"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    image: proximy-badgeage:latest
+    restart: unless-stopped
+    command: ["web"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://badgeage:${POSTGRES_PASSWORD}@db:5432/badgeage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/sante')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  worker:
+    build: .
+    image: proximy-badgeage:latest
+    restart: unless-stopped
+    command: ["worker"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://badgeage:${POSTGRES_PASSWORD}@db:5432/badgeage
+    depends_on:
+      app:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  pgdata:
