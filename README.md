@@ -37,6 +37,10 @@ Application web de badgeage des arrivées et départs des salariés, avec contr�
 
 Code : `app/services` (logique métier), `app/routers` (pages), `app/templates` (écrans), `migrations` (schéma de base Alembic), `tests`.
 
+## Tester avant le déploiement
+
+Un kit de démonstration lance l'application sur un PC avec des données fictives : double-cliquez sur `demo\demarrer.bat` (Windows) puis ouvrez http://localhost:8080. Voir [docs/DEMO.md](docs/DEMO.md).
+
 ## Déploiement
 
 Voir [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md). En résumé :

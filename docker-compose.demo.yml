@@ -1,0 +1,40 @@
+# Kit de démonstration : à lancer sur un PC pour tester l'application avec des données fictives.
+#   docker compose -f docker-compose.demo.yml up -d --build
+#   puis ouvrir http://localhost:8080
+# Ne pas utiliser en production : pas de HTTPS, mots de passe connus.
+
+name: badgeage-demo
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: badgeage
+      POSTGRES_USER: badgeage
+      POSTGRES_PASSWORD: demo
+    volumes:
+      - demo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U badgeage -d badgeage"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    image: proximy-badgeage:demo
+    command: ["demo"]
+    environment:
+      DEMO: "1"
+      DATABASE_URL: postgresql+psycopg://badgeage:demo@db:5432/badgeage
+      COOKIE_SECURE: "false"
+      BASE_URL: http://localhost:8080
+      TIMEZONE: Europe/Paris
+    ports:
+      - "127.0.0.1:8080:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  demo-pgdata:
