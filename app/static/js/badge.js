@@ -74,9 +74,19 @@
       return;
     }
     statut.textContent = "Vérification de votre position…";
+    // Si la demande d'autorisation reste sans réponse, le navigateur ne rappelle jamais :
+    // au bout de 30 s, le badgeage part sans position plutôt que de rester bloqué.
+    var envoye = false;
+    function une_fois(pos) {
+      if (envoye) return;
+      envoye = true;
+      clearTimeout(garde);
+      envoyer(pos);
+    }
+    var garde = setTimeout(function () { une_fois(null); }, 30000);
     navigator.geolocation.getCurrentPosition(
-      function (pos) { envoyer(pos); },
-      function () { envoyer(null); },
+      function (pos) { une_fois(pos); },
+      function () { une_fois(null); },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
   });

@@ -13,6 +13,15 @@ case "$1" in
       --access-logfile - \
       --timeout 60
     ;;
+  demo)
+    # Kit de démonstration : base fictive chargée au premier démarrage, sans HTTPS.
+    alembic upgrade head
+    python -m app.demo
+    exec gunicorn app.main:app \
+      --worker-class uvicorn.workers.UvicornWorker \
+      --workers 1 \
+      --bind 0.0.0.0:8000
+    ;;
   worker)
     exec python -m app.jobs
     ;;
