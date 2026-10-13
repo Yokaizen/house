@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titre %}Paramètres{% endblock %}
+{% block contenu %}
+{% include "admin/_nav.html" %}
+<h1>Paramètres</h1>
+{% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+<form method="post" action="/admin/parametres">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  {% for groupe, defs in groupes.items() %}
+  <div class="feuille">
+    <h2>{{ groupe }}</h2>
+    {% for d in defs %}
+    <div class="champ">
+      {% if d.type.__name__ == 'bool' %}
+      <label class="case"><input type="checkbox" name="{{ d.cle }}" {{ 'checked' if valeurs[d.cle] in (true, 'on') }}>
+        <span>{{ d.libelle }}{% if d.aide %}<span class="aide">{{ d.aide }}</span>{% endif %}</span></label>
+      {% else %}
+      <label for="{{ d.cle }}">{{ d.libelle }}{% if d.aide %}<span class="aide">{{ d.aide }}</span>{% endif %}</label>
+      <input type="text" inputmode="decimal" id="{{ d.cle }}" name="{{ d.cle }}" value="{{ ('%g'|format(valeurs[d.cle])).replace('.', ',') if valeurs[d.cle] is number else valeurs[d.cle] }}" style="max-width:160px">
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% if groupe == 'Conservation des données' %}
+    <p class="lecture">La purge est quotidienne et définitive. Vérifiez la durée retenue avec votre DPO : le Code du travail impose de pouvoir présenter les décomptes de durée du travail à l'inspection du travail pendant un an.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+  <button class="bouton" type="submit">Enregistrer les paramètres</button>
+</form>
+{% endblock %}

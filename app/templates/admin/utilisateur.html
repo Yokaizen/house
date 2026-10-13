@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titre %}{{ cible.nom_complet if cible else 'Nouvel utilisateur' }}{% endblock %}
+{% block contenu %}
+{% include "admin/_nav.html" %}
+{% set v = valeurs or {} %}
+{% macro val(champ, defaut='') %}{{ v[champ] if champ in v else (cible[champ] if cible and cible[champ] is not none else defaut) }}{% endmacro %}
+<p><a href="/admin/utilisateurs">← Utilisateurs</a></p>
+<h1>{{ cible.nom_complet if cible else 'Nouvel utilisateur' }}</h1>
+{% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+<form method="post" action="/admin/utilisateurs/enregistrer">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  {% if cible %}<input type="hidden" name="id" value="{{ cible.id }}">{% endif %}
+  <div class="feuille">
+    <h2>Identité et rattachement</h2>
+    <div class="ligne-champs">
+      <div class="champ"><label for="matricule">Matricule</label><input type="text" id="matricule" name="matricule" value="{{ val('matricule') }}" required></div>
+      <div class="champ"><label for="nom">Nom</label><input type="text" id="nom" name="nom" value="{{ val('nom') }}" required></div>
+      <div class="champ"><label for="prenom">Prénom</label><input type="text" id="prenom" name="prenom" value="{{ val('prenom') }}" required></div>
+      <div class="champ"><label for="email">E-mail</label><input type="email" id="email" name="email" value="{{ val('email') }}"></div>
+    </div>
+    <div class="ligne-champs">
+      <div class="champ"><label for="role">Rôle</label><select id="role" name="role">
+        {% for r in ROLES %}<option value="{{ r }}" {{ 'selected' if val('role', 'salarie') == r }}>{{ ROLE_LIBELLES[r] }}</option>{% endfor %}</select>
+        <span class="aide">Un salarié rattaché à d'autres voit leur suivi, quel que soit son rôle.</span></div>
+      <div class="champ"><label for="etablissement_id">Établissement</label><select id="etablissement_id" name="etablissement_id"><option value="">–</option>
+        {% for e in etablissements %}<option value="{{ e.id }}" {{ 'selected' if val('etablissement_id')|string == e.id|string }}>{{ e.nom }}</option>{% endfor %}</select></div>
+      <div class="champ"><label for="manager_id">Manager</label><select id="manager_id" name="manager_id"><option value="">–</option>
+        {% for m in managers if not cible or m.id != cible.id %}<option value="{{ m.id }}" {{ 'selected' if val('manager_id')|string == m.id|string }}>{{ m.nom }} {{ m.prenom }} ({{ m.matricule }})</option>{% endfor %}</select></div>
+      <div class="champ"><label for="heures_hebdo">Contrat hebdomadaire (h)</label><input type="text" inputmode="decimal" id="heures_hebdo" name="heures_hebdo" value="{{ val('heures_hebdo', 35) }}"></div>
+    </div>
+    <div class="ligne-champs">
+      <div class="champ"><label for="date_sortie">Date de sortie</label><input type="date" id="date_sortie" name="date_sortie" value="{{ val('date_sortie') }}">
+        <span class="aide">Le compte sera supprimé automatiquement après le délai de conservation.</span></div>
+      <div class="champ"><label class="case"><input type="checkbox" name="actif" {{ 'checked' if (v.get('actif') == 'on') or (not v and (not cible or cible.actif)) }}><span>Compte actif</span></label></div>
+    </div>
+  </div>
+
+  <div class="feuille">
+    <h2>Domicile (télétravail)</h2>
+    <label class="case champ"><input type="checkbox" name="teletravail_autorise" {{ 'checked' if (v.get('teletravail_autorise') == 'on') or (not v and (not cible or cible.teletravail_autorise)) }}><span>Badgeage autorisé depuis le domicile</span></label>
+    <div class="ligne-champs">
+      <div class="champ"><label for="adresse_numero">N°</label><input type="text" id="adresse_numero" name="adresse_numero" value="{{ val('adresse_numero') }}"></div>
+      <div class="champ" style="grid-column: span 2"><label for="adresse_voie">Voie</label><input type="text" id="adresse_voie" name="adresse_voie" value="{{ val('adresse_voie') }}"></div>
+      <div class="champ"><label for="adresse_complement">Complément</label><input type="text" id="adresse_complement" name="adresse_complement" value="{{ val('adresse_complement') }}"></div>
+    </div>
+    <div class="ligne-champs">
+      <div class="champ"><label for="code_postal">Code postal</label><input type="text" id="code_postal" name="code_postal" value="{{ val('code_postal') }}"></div>
+      <div class="champ"><label for="ville">Ville</label><input type="text" id="ville" name="ville" value="{{ val('ville') }}"></div>
+      <div class="champ"><label>&nbsp;</label><button type="button" class="bouton secondaire" id="geocoder">Localiser l'adresse</button></div>
+    </div>
+    <p class="discret" id="geocodage-resultat"></p>
+    <div class="ligne-champs">
+      <div class="champ"><label for="domicile_lat">Latitude</label><input type="text" id="domicile_lat" name="domicile_lat" value="{{ val('domicile_lat') }}"></div>
+      <div class="champ"><label for="domicile_lon">Longitude</label><input type="text" id="domicile_lon" name="domicile_lon" value="{{ val('domicile_lon') }}"></div>
+      <div class="champ"><label for="domicile_rayon_m">Rayon (m)</label><input type="number" id="domicile_rayon_m" name="domicile_rayon_m" min="20" max="5000" value="{{ val('domicile_rayon_m') }}" placeholder="{{ rayon_defaut }} par défaut"></div>
+    </div>
+    {% with id_lat='domicile_lat', id_lon='domicile_lon', id_rayon='domicile_rayon_m' %}{% include "admin/_carte.html" %}{% endwith %}
+  </div>
+  <div class="actions"><button class="bouton" type="submit">Enregistrer</button></div>
+</form>
+
+{% if cible %}
+<div class="feuille" style="margin-top:24px">
+  <h2>Accès</h2>
+  <p class="discret">Dernière connexion : {{ cible.derniere_connexion|date_fr if cible.derniere_connexion else 'jamais' }}{% if cible.doit_changer_mdp %} · mot de passe provisoire non encore changé{% endif %}</p>
+  <div class="actions">
+    <form method="post" action="/admin/utilisateurs/{{ cible.id }}/reinitialiser" onsubmit="return confirm('Générer un nouveau mot de passe provisoire ? Les sessions ouvertes seront fermées.')">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="bouton secondaire">Réinitialiser le mot de passe</button></form>
+    <a class="bouton secondaire" href="/equipe/{{ cible.id }}">Voir ses badgeages</a>
+  </div>
+  {% if cible.id != moi.id %}
+  <details style="margin-top:18px"><summary class="discret">Supprimer définitivement</summary>
+    <form method="post" action="/admin/utilisateurs/{{ cible.id }}/supprimer" class="actions" style="margin-top:10px">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <input type="text" name="confirmation" placeholder="Recopiez le matricule {{ cible.matricule }}" style="max-width:280px" required>
+      <button class="bouton rose">Supprimer le compte et ses badgeages</button>
+    </form>
+    <p class="discret">Pour un départ, préférez renseigner la date de sortie : la suppression sera automatique.</p>
+  </details>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

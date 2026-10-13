@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#061E66">
+  <title>{% block titre %}Badgeage{% endblock %} · Proximy</title>
+  <link rel="stylesheet" href="/static/css/app.css?v=2">
+  <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  {% block tete %}{% endblock %}
+</head>
+<body>
+<header class="entete">
+  <div class="entete-contenu">
+    <a class="logo" href="/"><span class="proxi">PROXI</span><span class="my">MY</span><small>Badgeage</small></a>
+    {% if moi and not moi.doit_changer_mdp %}
+    <nav class="nav">
+      <a href="/" class="{{ 'actif' if request.url.path == '/' }}">Badger</a>
+      <a href="/mes-badgeages" class="{{ 'actif' if request.url.path.startswith('/mes-badgeages') }}">Mes badgeages</a>
+      {% if menu_equipe %}
+      <a href="/equipe" class="{{ 'actif' if request.url.path.startswith('/equipe') }}">{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}</a>
+      {% endif %}
+      {% if moi.est_admin %}
+      <a class="admin {{ 'actif' if request.url.path.startswith('/admin') }}" href="/admin/utilisateurs">Administration</a>
+      {% endif %}
+      <a href="/mot-de-passe" title="Changer mon mot de passe">{{ moi.prenom }}</a>
+      <form method="post" action="/deconnexion">
+        <input type="hidden" name="csrf_token" value="{{ csrf }}">
+        <button class="lien nav-lien" style="color:var(--gris-3);padding:6px 10px">Déconnexion</button>
+      </form>
+    </nav>
+    {% endif %}
+  </div>
+</header>
+<main class="page {% block classe_page %}{% endblock %}">
+  {% if flash %}<div class="flash {{ flash[0] }}" role="status">{{ flash[1] }}</div>{% endif %}
+  {% block contenu %}{% endblock %}
+</main>
+<footer class="pied">
+  Parce que la confiance se livre aussi. · <a href="/confidentialite">Vos données</a>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

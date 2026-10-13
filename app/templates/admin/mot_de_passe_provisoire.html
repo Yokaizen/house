@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titre %}Mot de passe provisoire{% endblock %}
+{% block classe_page %}etroit{% endblock %}
+{% block contenu %}
+<div class="feuille">
+  <h1>Mot de passe provisoire</h1>
+  <p>Transmettez ces identifiants à <strong>{{ cible.nom_complet }}</strong>. Ce mot de passe ne sera plus affiché ensuite ; il devra être changé à la première connexion.</p>
+  <p>Identifiant : <strong>{{ cible.matricule }}</strong>{% if cible.email %} ou {{ cible.email }}{% endif %}</p>
+  <p class="mdp-provisoire">{{ mdp }}</p>
+  <div class="actions"><a class="bouton" href="/admin/utilisateurs/{{ cible.id }}">Retour à la fiche</a></div>
+</div>
+{% endblock %}

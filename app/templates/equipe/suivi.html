@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import filtre_periode %}
+{% block titre %}{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}{% endblock %}
+{% block contenu %}
+<div class="actions" style="justify-content:space-between;margin-bottom:12px">
+  <h1 style="margin:0">{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}</h1>
+  <div class="actions">
+    {% if nb_en_attente %}<a class="bouton rose petit" href="/validations">{{ nb_en_attente }} saisie(s) à valider</a>{% endif %}
+    <a class="bouton secondaire petit" href="/equipe/export.xlsx?{{ requete }}">Exporter (Excel)</a>
+  </div>
+</div>
+
+<form class="feuille filtres" method="get" action="/equipe">
+  {{ filtre_periode(f, PERIODES) }}
+  {% if moi.vue_globale %}
+  <div class="champ"><label for="etablissement">Établissement</label>
+    <select id="etablissement" name="etablissement"><option value="">Tous</option>
+      {% for e in etablissements %}<option value="{{ e.id }}" {{ 'selected' if f.etablissement == e.id }}>{{ e.nom }}</option>{% endfor %}
+    </select></div>
+  <div class="champ"><label for="manager">Manager</label>
+    <select id="manager" name="manager"><option value="">Tous</option>
+      {% for m in managers %}<option value="{{ m.id }}" {{ 'selected' if f.manager == m.id }}>{{ m.nom }} {{ m.prenom }}</option>{% endfor %}
+    </select></div>
+  {% endif %}
+  <div class="champ"><label for="q">Recherche</label><input type="search" id="q" name="q" value="{{ f.q }}" placeholder="Nom, matricule"></div>
+  <div class="champ" style="flex:0"><label class="case"><input type="checkbox" name="alertes" value="1" {{ 'checked' if f.alertes }}><span>Avec alertes</span></label></div>
+  <div class="champ" style="flex:0"><button class="bouton" type="submit">Afficher</button></div>
+</form>
+
+<div class="feuille">
+  <p class="discret">Du {{ f.debut|date_fr }} au {{ f.fin|date_fr }} · {{ lignes|length }} collaborateur(s).
+    Durée théorique : contrat ÷ 5 par jour ouvré jusqu'à aujourd'hui, hors absences.</p>
+  <div class="defilant">
+  <table>
+    <thead><tr>
+      <th>Collaborateur</th>{% if moi.vue_globale %}<th class="masque-mobile">Établissement</th>{% endif %}
+      <th class="num">Jours</th><th class="num">Badgé</th><th class="num">Théorique</th><th class="num">Écart</th>
+      {% for a, m in mois %}<th class="num">{{ MOIS_COURTS[m - 1] }} {{ a }}</th>{% endfor %}
+      <th>Vigilance</th><th class="num">Manuels</th>
+    </tr></thead>
+    <tbody>
+    {% for s in lignes %}
+      {% set c = s.compte_alertes() %}
+      <tr>
+        <td class="nom"><a href="/equipe/{{ s.utilisateur.id }}?{{ requete }}"><strong>{{ s.utilisateur.nom }} {{ s.utilisateur.prenom }}</strong></a>
+          <div class="discret">{{ s.utilisateur.matricule }}{% if s.utilisateur.manager and moi.vue_globale %} · {{ s.utilisateur.manager.nom_complet }}{% endif %}</div></td>
+        {% if moi.vue_globale %}<td class="masque-mobile">{{ s.utilisateur.etablissement.nom if s.utilisateur.etablissement else '–' }}</td>{% endif %}
+        <td class="num">{{ s.jours_travailles }}</td>
+        <td class="num"><strong>{{ s.duree|duree }}</strong></td>
+        <td class="num">{{ s.duree_attendue|duree }}</td>
+        <td class="num {{ 'negatif' if s.ecart.total_seconds() < 0 }}">{{ s.ecart|duree(true) }}</td>
+        {% set pm = s.par_mois() %}
+        {% for cle in mois %}<td class="num">{{ pm.get(cle)|duree if pm.get(cle) else '–' }}</td>{% endfor %}
+        <td>{% for a, n in c.items() if a in ALERTES_GRAVES %}<span class="pastille grave">{{ ALERTES[a] }} × {{ n }}</span> {% else %}<span class="discret">–</span>{% endfor %}
+          {% if c.get('en_attente') %}<span class="pastille attente">{{ c.en_attente }} à valider</span>{% endif %}</td>
+        <td class="num">{{ c.get('manuel', 0) }}</td>
+      </tr>
+    {% else %}
+      <tr class="vide"><td colspan="10">Aucun collaborateur ne correspond à ces critères.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

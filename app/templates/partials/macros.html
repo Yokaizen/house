@@ -1,0 +1,29 @@
+{# Affichage d'un badgeage : heure + origine + résultat du contrôle de zone. #}
+{% macro badgeage(p, detail=false) -%}
+{%- if p -%}
+<span class="{{ 'heure-manuelle' if p.est_manuel }}" title="{{ 'Saisi le ' ~ (p.saisi_le|date_fr) ~ ' à ' ~ (p.saisi_le|heure) if p.est_manuel }}">{{ p.horodatage|heure }}</span>
+{% if p.source == 'manuel' %}<span class="pastille manuel" title="{{ p.motif }}">Saisie manuelle</span>
+{% elif p.source == 'correction' %}<span class="pastille correction" title="{{ p.motif }}">Correction</span>
+{% else %}<span class="pastille {{ p.zone_statut }}" title="{% if p.appareil %}{{ 'Smartphone' if p.appareil == 'mobile' else 'Ordinateur' }}{% if p.precision_m %}, précision ± {{ p.precision_m }} m{% endif %}{% endif %}">{{ ZONE_LIBELLES[p.zone_statut] }}{% if p.appareil == 'ordinateur' %} · PC{% endif %}</span>{% endif %}
+{% if p.modifie_le %}<span class="pastille correction" title="{{ p.commentaire_validation or '' }}">Corrigé</span>{% endif %}
+{% if p.statut_validation == 'en_attente' %}<span class="pastille attente">À valider</span>{% endif %}
+{% if detail and p.motif %}<div class="discret">Motif : {{ p.motif }}</div>{% endif %}
+{%- else -%}<span class="discret">–</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro alertes(liste) -%}
+{% for a in liste %}<span class="pastille {{ 'grave' if a in ALERTES_GRAVES else 'info' }}">{{ ALERTES[a] }}</span> {% endfor %}
+{%- endmacro %}
+
+{% macro filtre_periode(f, PERIODES) -%}
+<div class="champ">
+  <label for="periode">Période</label>
+  <select id="periode" name="periode" onchange="document.getElementById('dates-perso').hidden = this.value !== 'perso'">
+    {% for code, lib in PERIODES.items() %}<option value="{{ code }}" {{ 'selected' if f.periode == code }}>{{ lib }}</option>{% endfor %}
+  </select>
+</div>
+<div id="dates-perso" class="filtres" style="flex:2" {{ 'hidden' if f.periode != 'perso' }}>
+  <div class="champ"><label for="debut">Du</label><input type="date" id="debut" name="debut" value="{{ f.debut.isoformat() }}"></div>
+  <div class="champ"><label for="fin">Au</label><input type="date" id="fin" name="fin" value="{{ f.fin.isoformat() }}"></div>
+</div>
+{%- endmacro %}

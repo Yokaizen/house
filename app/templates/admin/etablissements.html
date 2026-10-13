@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titre %}Établissements{% endblock %}
+{% block contenu %}
+{% include "admin/_nav.html" %}
+<div class="actions" style="justify-content:space-between;margin-bottom:12px">
+  <h1 style="margin:0">Établissements</h1>
+  <a class="bouton" href="/admin/etablissements/nouveau">Ajouter un établissement</a>
+</div>
+<div class="feuille defilant">
+<table>
+  <thead><tr><th>Code</th><th>Nom</th><th>Adresse</th><th class="num">Rayon</th><th>Position</th><th class="num">Salariés actifs</th></tr></thead>
+  <tbody>
+  {% for e in etablissements %}
+  <tr>
+    <td>{{ e.code }}</td>
+    <td class="nom"><a href="/admin/etablissements/{{ e.id }}"><strong>{{ e.nom }}</strong></a>{% if not e.actif %} <span class="pastille">Inactif</span>{% endif %}</td>
+    <td>{{ e.adresse_numero or '' }} {{ e.adresse_voie or '' }} {{ e.code_postal or '' }} {{ e.ville or '' }}</td>
+    <td class="num">{{ e.rayon_m }} m</td>
+    <td>{% if e.localise %}<span class="pastille dans_zone">Localisé</span>{% else %}<span class="pastille hors_zone">À localiser</span>{% endif %}</td>
+    <td class="num">{{ effectifs.get(e.id, 0) }}</td>
+  </tr>
+  {% else %}<tr class="vide"><td colspan="6">Aucun établissement. Commencez par en créer un.</td></tr>{% endfor %}
+  </tbody>
+</table>
+<p class="discret">Un établissement non localisé n'est pas pris en compte dans le contrôle de zone.</p>
+</div>
+{% endblock %}
