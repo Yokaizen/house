@@ -39,6 +39,10 @@ def _tableau(ws, ligne: int, entetes: list[str], lignes: list[list], formats: di
     for i, valeurs in enumerate(lignes, 1):
         for c, v in enumerate(valeurs, 1):
             cell = ws.cell(ligne + i, c, v)
+            if cell.data_type == "f":
+                # openpyxl fait une formule de tout texte commençant par « = » : les tableaux ne contiennent
+                # que des données (motif saisi par un salarié, nom importé...), jamais de formule.
+                cell.data_type = "s"
             cell.font, cell.border = _corps, _bordure
             if i % 2 == 0:
                 cell.fill = _fond_alterne

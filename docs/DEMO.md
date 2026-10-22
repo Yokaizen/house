@@ -41,8 +41,10 @@ Pour tester plusieurs rôles en même temps, ouvrez une fenêtre de navigation p
 ## 5. Ce qu'il faut essayer
 
 **En tant que salarié** (`S001`)
-- [ ] Badger son arrivée, puis son départ. Le navigateur demande l'autorisation de localisation.
-- [ ] Refuser la localisation et vérifier que le badgeage est enregistré avec « Position refusée ».
+
+Par défaut, un salarié ne peut badger qu'une arrivée et un départ par jour : faites les deux premiers points dans cet ordre.
+- [ ] Badger son arrivée en acceptant la localisation quand le navigateur la demande.
+- [ ] Badger son départ en refusant cette fois la localisation : le départ est enregistré avec « Position refusée ». Le navigateur retient le choix précédent et ne redemande pas : avant de badger, bloquez la localisation depuis l'icône à gauche de l'adresse, puis rechargez la page.
 - [ ] « J'ai oublié de badger » : saisir un oubli d'hier, puis le retrouver dans « Mes badgeages ».
 - [ ] Essayer de saisir un oubli datant de plus de 7 jours : la saisie est refusée.
 
@@ -66,7 +68,7 @@ Les agences de démonstration sont placées au centre de chaque commune, pas à 
 
 1. Connectez-vous en `ADMIN`, puis ouvrez Administration › Établissements › **Agence test**.
 2. Saisissez l'adresse de votre bureau et cliquez sur « Localiser l'adresse », ou cliquez directement sur la carte. Enregistrez.
-3. Connectez-vous avec un salarié et badgez.
+3. Connectez-vous avec un salarié qui n'a pas encore badgé aujourd'hui (`S003` par exemple : `S001` a déjà terminé sa journée) et badgez.
 
 Sur un ordinateur, la position est souvent approximative (Wi-Fi ou adresse internet). Un résultat « Indéterminé » est donc normal : c'est précisément ce cas que le seuil de précision « ordinateur » sert à repérer. Sous Windows, la localisation doit être activée dans Paramètres › Confidentialité › Localisation.
 
@@ -79,7 +81,7 @@ Les téléphones n'acceptent de donner leur position qu'à un site en HTTPS. Pou
    ```
    cloudflared tunnel --url http://localhost:8080
    ```
-3. Une adresse du type `https://xxxx.trycloudflare.com` s'affiche. Ouvrez-la sur le téléphone et connectez-vous en `S001`.
+3. Une adresse du type `https://xxxx.trycloudflare.com` s'affiche. Ouvrez-la sur le téléphone et connectez-vous avec un salarié qui n'a pas encore badgé aujourd'hui (`S004` par exemple).
 4. Pour fermer l'accès, faites Ctrl+C dans l'invite de commandes.
 
 Pendant ce test, l'application est joignable depuis Internet par quiconque connaît l'adresse : n'y saisissez que des données fictives.
