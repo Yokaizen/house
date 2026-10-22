@@ -6,6 +6,7 @@ from app.db import get_db
 from app.models import Utilisateur
 from app.security import (
     COOKIE,
+    adresse_client,
     authentifier,
     erreurs_mdp,
     fermer_session,
@@ -39,7 +40,7 @@ def connexion(
     rester_connecte: str | None = Form(None),
     db: Session = Depends(get_db),
 ):
-    u, erreur = authentifier(db, identifiant, mot_de_passe)
+    u, erreur = authentifier(db, identifiant, mot_de_passe, adresse_client(request))
     if u is None:
         return rendre(request, "connexion.html", statut=400, erreur=erreur, identifiant=identifiant)
     token, max_age = ouvrir_session(db, u, request.headers.get("user-agent"), longue=bool(rester_connecte))
