@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from app.db import SessionLocal
 from app.models import Etablissement, Utilisateur
-from app.security import hacher, mdp_temporaire
+from app.security import debloquer, hacher, mdp_temporaire
 
 
 def creer_admin(matricule: str, nom: str, prenom: str, email: str | None = None) -> None:
@@ -21,7 +21,8 @@ def creer_admin(matricule: str, nom: str, prenom: str, email: str | None = None)
             db.add(u)
         u.role, u.actif = "admin", True
         u.mot_de_passe_hash, u.doit_changer_mdp = hacher(mdp), True
-        u.echecs_connexion, u.bloque_jusqu_a = 0, None
+        db.flush()
+        debloquer(db, u)
         db.commit()
     print(f"Administrateur {matricule} prêt. Mot de passe provisoire : {mdp}")
     print("Il devra être changé à la première connexion.")

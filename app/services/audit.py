@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Audit, Utilisateur
 
-_EXCLUS = {"mot_de_passe_hash", "echecs_connexion", "bloque_jusqu_a", "derniere_connexion"}
+_EXCLUS = {"mot_de_passe_hash", "bloque_jusqu_a", "derniere_connexion"}
 
 
 def _valeur(v):
