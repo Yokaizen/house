@@ -131,6 +131,20 @@ def test_export_excel(client_de, donnees):
     assert wb.sheetnames == ["Synthèse", "Détail", "Légende"]
 
 
+def test_export_excel_sans_formule(client_de):
+    # Un motif saisi par un salarié ne doit pas devenir une formule dans le fichier ouvert par les RH.
+    sal = client_de("sal")
+    motif = '=HYPERLINK("https://exemple.invalid","Voir le justificatif")'
+    hier = date.today() - timedelta(days=1)
+    r = sal.post("/oubli", data={"type": "entree", "jour": hier.isoformat(), "heure": "08:00", "motif": motif,
+                                 "csrf_token": sal.csrf})
+    assert r.status_code == 200, r.text
+    r = client_de("admin").get("/equipe/export.xlsx?periode=3mois")
+    detail = load_workbook(BytesIO(r.content))["Détail"]
+    cellules = [c for ligne in detail.iter_rows() for c in ligne if c.value == motif]
+    assert cellules and all(c.data_type == "s" for c in cellules)
+
+
 def test_pages_admin(client_de, donnees):
     admin = client_de("admin")
     for url in ["/admin/utilisateurs", "/admin/utilisateurs/nouveau", f"/admin/utilisateurs/{donnees['sal'].id}",
