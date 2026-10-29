@@ -1,45 +1,67 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="sans-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#061E66">
-  <title>{% block titre %}Badgeage{% endblock %} · Proximy</title>
-  <link rel="stylesheet" href="/static/css/app.css?v=2">
+  <title>{% block titre %}Badgeage{% endblock %} | Proximy Badgeage</title>
+  <link rel="stylesheet" href="/static/css/app.css?v=4">
   <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/static/manifest.webmanifest">
+  <script>document.documentElement.classList.remove("sans-js");</script>
   {% block tete %}{% endblock %}
 </head>
 <body>
+<a class="aller-contenu" href="#contenu">Aller au contenu</a>
 <header class="entete">
   <div class="entete-contenu">
-    <a class="logo" href="/"><span class="proxi">PROXI</span><span class="my">MY</span><small>Badgeage</small></a>
+    <a class="logo" href="/" aria-label="Proximy Badgeage, accueil"><span class="marque"><span class="proxi">PROXI</span><span class="my">MY</span></span><small>Badgeage</small></a>
     {% if moi and not moi.doit_changer_mdp %}
-    <nav class="nav">
-      <a href="/" class="{{ 'actif' if request.url.path == '/' }}">Badger</a>
-      <a href="/mes-badgeages" class="{{ 'actif' if request.url.path.startswith('/mes-badgeages') }}">Mes badgeages</a>
+    {% set chemin = request.url.path %}
+    <button class="bouton-menu" type="button" aria-expanded="false" aria-controls="nav" aria-label="Ouvrir le menu">
+      <svg class="ouvrir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="fermer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <nav class="nav" id="nav" aria-label="Menu principal">
+      <a href="/" {{ 'aria-current="page"'|safe if chemin == '/' }}>Badger</a>
+      <a href="/mes-badgeages" {{ 'aria-current="page"'|safe if chemin.startswith('/mes-badgeages') or chemin == '/oubli' }}>Mes badgeages</a>
       {% if menu_equipe %}
-      <a href="/equipe" class="{{ 'actif' if request.url.path.startswith('/equipe') }}">{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}</a>
+      <a href="/equipe" {{ 'aria-current="page"'|safe if chemin.startswith('/equipe') or chemin.startswith('/validations') }}>{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}</a>
       {% endif %}
       {% if moi.est_admin %}
-      <a class="admin {{ 'actif' if request.url.path.startswith('/admin') }}" href="/admin/utilisateurs">Administration</a>
+      <a href="/admin/utilisateurs" {{ 'aria-current="page"'|safe if chemin.startswith('/admin') }}>Administration</a>
       {% endif %}
-      <a href="/mot-de-passe" title="Changer mon mot de passe">{{ moi.prenom }}</a>
+      <a href="/mot-de-passe" title="Changer mon mot de passe" {{ 'aria-current="page"'|safe if chemin == '/mot-de-passe' }}>{{ moi.prenom }}</a>
       <form method="post" action="/deconnexion">
         <input type="hidden" name="csrf_token" value="{{ csrf }}">
-        <button class="lien nav-lien" style="color:var(--gris-3);padding:6px 10px">Déconnexion</button>
+        <button class="lien">Se déconnecter</button>
       </form>
     </nav>
     {% endif %}
   </div>
 </header>
-<main class="page {% block classe_page %}{% endblock %}">
-  {% if flash %}<div class="flash {{ flash[0] }}" role="status">{{ flash[1] }}</div>{% endif %}
+<main class="page {% block classe_page %}{% endblock %}" id="contenu" tabindex="-1">
+  {% if flash %}<div class="flash {{ flash[0] }}" role="{{ 'alert' if flash[0] == 'erreur' else 'status' }}">{{ flash[1] }}</div>{% endif %}
   {% block contenu %}{% endblock %}
 </main>
 <footer class="pied">
-  Parce que la confiance se livre aussi. · <a href="/confidentialite">Vos données</a>
+  <div class="pied-contenu">
+    <span class="slogan">Parce que la confiance se livre aussi.</span>
+    <a href="/confidentialite">Vos données</a>
+  </div>
 </footer>
+<script>
+(function () {
+  var b = document.querySelector(".bouton-menu"), n = document.getElementById("nav");
+  if (!b || !n) return;
+  b.addEventListener("click", function () {
+    var ouvert = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", ouvert);
+    b.setAttribute("aria-label", ouvert ? "Fermer le menu" : "Ouvrir le menu");
+    n.classList.toggle("ouvert", ouvert);
+  });
+})();
+</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

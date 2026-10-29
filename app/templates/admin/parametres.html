@@ -3,7 +3,7 @@
 {% block contenu %}
 {% include "admin/_nav.html" %}
 <h1>Paramètres</h1>
-{% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+{% if erreurs %}<div class="erreurs" role="alert"><ul>{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
 <form method="post" action="/admin/parametres">
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
   {% for groupe, defs in groupes.items() %}
@@ -25,6 +25,6 @@
     {% endif %}
   </div>
   {% endfor %}
-  <button class="bouton" type="submit">Enregistrer les paramètres</button>
+  <button class="bouton principal" type="submit">Enregistrer les paramètres</button>
 </form>
 {% endblock %}

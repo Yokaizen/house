@@ -42,24 +42,24 @@ async def _changement_mdp(request: Request, exc: ChangementMdpRequis):
 async def _acces_refuse(request: Request, exc: AccesRefuse):
     if _attend_json(request):
         return JSONResponse({"erreur": "Accès refusé."}, status_code=403)
-    return rendre(request, "erreur.html", statut=403, titre="Accès refusé",
-                  message="Vous n'avez pas les droits nécessaires pour afficher cette page.")
+    return rendre(request, "erreur.html", statut=403, code=403, titre="Cette page est réservée.",
+                  message="Votre compte n'a pas accès à cette page. Si vous pensez que c'est une erreur, contactez votre administrateur.")
 
 
 @app.exception_handler(CsrfInvalide)
 async def _csrf(request: Request, exc: CsrfInvalide):
     if _attend_json(request):
         return JSONResponse({"erreur": "Jeton de sécurité invalide, rechargez la page."}, status_code=403)
-    return rendre(request, "erreur.html", statut=403, titre="Formulaire expiré",
-                  message="Le formulaire a expiré. Revenez en arrière, rechargez la page et recommencez.")
+    return rendre(request, "erreur.html", statut=403, titre="Le formulaire a expiré.", retour=True,
+                  message="Par sécurité, le formulaire n'est plus valable. Revenez en arrière, rechargez la page puis recommencez.")
 
 
 @app.exception_handler(404)
 async def _introuvable(request: Request, exc):
     if _attend_json(request):
         return JSONResponse({"erreur": "Introuvable."}, status_code=404)
-    return rendre(request, "erreur.html", statut=404, titre="Page introuvable",
-                  message="La page demandée n'existe pas ou n'est plus disponible.")
+    return rendre(request, "erreur.html", statut=404, code=404, titre="Cette page a changé d'adresse.",
+                  message="La page demandée n'existe pas ou n'est plus disponible. Repartez de l'accueil.")
 
 
 @app.middleware("http")

@@ -7,7 +7,7 @@
     <input type="hidden" name="retour" value="{{ request.url.path }}{{ '?' ~ retour if retour }}">
     <div class="champ"><input type="text" name="commentaire" placeholder="Commentaire (facultatif)"></div>
     <div class="actions"><button class="bouton petit" name="decision" value="valider">Valider</button>
-      <button class="bouton petit rose" name="decision" value="refuser">Refuser</button></div>
+      <button class="bouton petit secondaire" name="decision" value="refuser">Refuser</button></div>
   </form>
   {% endif %}
   {% if corriger %}
@@ -16,15 +16,15 @@
     <div class="ligne-champs">
       <div class="champ"><select name="type" aria-label="Type"><option value="entree" {{ 'selected' if p.type == 'entree' }}>Arrivée</option><option value="sortie" {{ 'selected' if p.type == 'sortie' }}>Départ</option></select></div>
       <div class="champ"><input type="date" name="jour" value="{{ p.horodatage|date_iso }}" required aria-label="Date"></div>
-      <div class="champ"><input type="time" name="heure" value="{{ p.horodatage|heure }}" required aria-label="Heure"></div>
+      <div class="champ"><input type="time" name="heure" value="{{ p.horodatage|heure_saisie }}" required aria-label="Heure"></div>
     </div>
     <div class="champ"><input type="text" name="motif" placeholder="Motif de la correction (obligatoire)" required minlength="3"></div>
-    <button class="bouton petit">Corriger</button>
+    <button class="bouton petit">Corriger le badgeage</button>
   </form>
-  <form method="post" action="/pointages/{{ p.id }}/supprimer" onsubmit="return confirm('Supprimer ce badgeage ?')">
+  <form method="post" action="/pointages/{{ p.id }}/supprimer" onsubmit="return confirm('Supprimer ce badgeage ? La suppression est définitive ; elle reste tracée dans le journal d\'audit.')">
     <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="retour" value="{{ retour }}">
     <div class="champ"><input type="text" name="motif" placeholder="Motif de la suppression (obligatoire)" required minlength="3"></div>
-    <button class="bouton petit rose">Supprimer</button>
+    <button class="bouton petit danger">Supprimer le badgeage</button>
   </form>
   {% endif %}
 </details>

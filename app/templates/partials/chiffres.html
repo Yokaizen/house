@@ -2,7 +2,7 @@
   <div class="carte"><span class="sur-titre">Durée badgée</span><span class="chiffre">{{ s.duree|duree }}</span></div>
   <div class="carte"><span class="sur-titre">Durée théorique</span><span class="chiffre">{{ s.duree_attendue|duree }}</span>
     <span class="discret">Contrat {{ '%g'|format(s.heures_contrat|float) }} h / semaine</span></div>
-  <div class="carte"><span class="sur-titre">Écart</span><span class="chiffre {{ 'rose' if s.ecart.total_seconds() < 0 }}">{{ s.ecart|duree(true) }}</span></div>
-  <div class="carte"><span class="sur-titre">Points de vigilance</span><span class="chiffre {{ 'rose' if s.nb_alertes_graves }}">{{ s.nb_alertes_graves }}</span></div>
+  <div class="carte"><span class="sur-titre">Écart</span><span class="chiffre {{ 'alerte' if s.ecart.total_seconds() < 0 }}">{{ s.ecart|duree(true) }}</span></div>
+  <div class="carte"><span class="sur-titre">Points de vigilance</span><span class="chiffre {{ 'alerte' if s.nb_alertes_graves }}">{{ s.nb_alertes_graves }}</span></div>
 </div>
 <p class="discret">La durée théorique ne tient pas compte des absences (congés, maladie). Elle est calculée jusqu'à aujourd'hui.</p>

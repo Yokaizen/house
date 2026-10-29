@@ -10,9 +10,9 @@
   <div class="grille" style="margin-bottom:14px">
     <div class="carte"><span class="sur-titre">Créés</span><span class="chiffre">{{ rapport.crees }}</span></div>
     <div class="carte"><span class="sur-titre">Mis à jour</span><span class="chiffre">{{ rapport.mis_a_jour }}</span></div>
-    <div class="carte"><span class="sur-titre">Lignes en erreur</span><span class="chiffre {{ 'rose' if rapport.erreurs }}">{{ rapport.erreurs|length }}</span></div>
+    <div class="carte"><span class="sur-titre">Lignes en erreur</span><span class="chiffre {{ 'alerte' if rapport.erreurs }}">{{ rapport.erreurs|length }}</span></div>
   </div>
-  {% if rapport.erreurs %}<h3>Erreurs (lignes non importées)</h3><ul class="erreurs">{% for e in rapport.erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  {% if rapport.erreurs %}<h3>Erreurs (lignes non importées)</h3><div class="erreurs" role="alert"><ul>{% for e in rapport.erreurs %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
   {% if rapport.avertissements %}<h3>Avertissements</h3><ul>{% for e in rapport.avertissements %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
   {% if rapport.identifiants %}
   <h3>Mots de passe provisoires des comptes créés</h3>
@@ -30,7 +30,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf }}">
     <div class="champ"><label for="fichier">Fichier CSV</label><input type="file" id="fichier" name="fichier" accept=".csv,text/csv" required></div>
     <label class="case champ"><input type="checkbox" name="geocoder_adresses" checked><span>Localiser automatiquement les adresses de domicile</span></label>
-    <button class="bouton">Importer</button>
+    <button class="bouton principal">Importer</button>
   </form>
 </div>
 <div class="feuille">

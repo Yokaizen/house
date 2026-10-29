@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% block titre %}{{ titre }}{% endblock %}
-{% block classe_page %}etroit{% endblock %}
+{% block classe_page %}etroit page-centree{% endblock %}
 {% block contenu %}
-<div class="feuille">
+<div class="feuille erreur-page">
+  {% if code %}<p class="sur-titre">Erreur {{ code }}</p>{% endif %}
   <h1>{{ titre }}</h1>
   <p>{{ message }}</p>
-  <a class="bouton" href="/">Retour à l'accueil</a>
+  <div class="actions">
+    <a class="bouton" href="/">Retour à l'accueil</a>
+    {% if retour %}<a class="bouton secondaire" href="javascript:history.back()">Revenir en arrière</a>{% endif %}
+  </div>
 </div>
 {% endblock %}

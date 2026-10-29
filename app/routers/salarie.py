@@ -19,7 +19,7 @@ from app.services.pointages import (
     saisie_manuelle,
     syntheses,
 )
-from app.services.temps import aujourd_hui, fin_de_mois, format_heure, ajouter_mois
+from app.services.temps import aujourd_hui, fin_de_mois, format_heure_fr, ajouter_mois
 from app.templating import rediriger, rendre
 
 router = APIRouter()
@@ -56,7 +56,7 @@ def api_badger(
     except ErreurMetier as e:
         return JSONResponse({"erreur": str(e)}, status_code=409)
     # La position reçue n'est ni stockée ni renvoyée : seul le résultat l'est.
-    return {"type": p.type, "heure": format_heure(p.horodatage), "zone": p.zone_statut}
+    return {"type": p.type, "heure": format_heure_fr(p.horodatage), "zone": p.zone_statut}
 
 
 @router.get("/mes-badgeages")

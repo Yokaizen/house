@@ -98,7 +98,16 @@ def format_duree(td: timedelta | float | None, signe: bool = False) -> str:
 
 
 def format_heure(dt: datetime | None) -> str:
+    """Heure « 07:30 » : champs de saisie et export Excel."""
     return vers_local(dt).strftime("%H:%M") if dt else "–"
+
+
+def format_heure_fr(dt: datetime | None) -> str:
+    """Heure affichée selon la charte Proximy : « 7 h 30 »."""
+    if not dt:
+        return "–"
+    t = vers_local(dt)
+    return f"{t.hour} h {t.minute:02d}"
 
 
 def format_date(j: date | datetime | None, avec_jour: bool = False) -> str:

@@ -63,6 +63,8 @@ pytest
 
 Les tests utilisent SQLite ; la production utilise PostgreSQL.
 
+L'interface suit la charte web Proximy : [docs/CHARTE-WEB.md](docs/CHARTE-WEB.md).
+
 ## Points à valider avant la mise en service
 
 - **Durées de conservation** : par défaut 12 mois pour les badgeages et 2 mois pour les comptes après la date de sortie (paramétrables). Le Code du travail impose de pouvoir présenter les décomptes de durée du travail pendant un an : à valider avec le DPO.
