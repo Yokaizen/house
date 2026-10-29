@@ -3,10 +3,10 @@
 {% block titre %}{{ cible.nom_complet }}{% endblock %}
 {% block contenu %}
 <p><a href="/equipe?{{ retour }}">← Retour au suivi</a></p>
-<div class="actions" style="justify-content:space-between;margin-bottom:8px">
+<div class="entete-page">
   <div>
     <p class="sur-titre">{{ cible.matricule }}{% if cible.etablissement %} · {{ cible.etablissement.nom }}{% endif %}{% if cible.manager %} · manager : {{ cible.manager.nom_complet }}{% endif %}</p>
-    <h1 style="margin:0">{{ cible.prenom }} {{ cible.nom }}{% if not cible.actif %} <span class="pastille">Inactif</span>{% endif %}</h1>
+    <h1>{{ cible.prenom }} {{ cible.nom }}{% if not cible.actif %} <span class="pastille">Inactif</span>{% endif %}</h1>
   </div>
   {% if moi.est_admin %}<a class="bouton secondaire petit" href="/admin/utilisateurs/{{ cible.id }}">Fiche utilisateur</a>{% endif %}
 </div>

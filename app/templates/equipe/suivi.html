@@ -2,10 +2,10 @@
 {% from "partials/macros.html" import filtre_periode %}
 {% block titre %}{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}{% endblock %}
 {% block contenu %}
-<div class="actions" style="justify-content:space-between;margin-bottom:12px">
-  <h1 style="margin:0">{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}</h1>
+<div class="entete-page">
+  <h1>{{ 'Suivi global' if moi.vue_globale else 'Mon équipe' }}</h1>
   <div class="actions">
-    {% if nb_en_attente %}<a class="bouton rose petit" href="/validations">{{ nb_en_attente }} saisie(s) à valider</a>{% endif %}
+    {% if nb_en_attente %}<a class="bouton principal petit" href="/validations">{{ nb_en_attente }} saisie(s) à valider</a>{% endif %}
     <a class="bouton secondaire petit" href="/equipe/export.xlsx?{{ requete }}">Exporter (Excel)</a>
   </div>
 </div>

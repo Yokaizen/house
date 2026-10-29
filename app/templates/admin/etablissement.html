@@ -6,7 +6,7 @@
 {% macro val(champ, defaut='') %}{{ v[champ] if champ in v else (etab[champ] if etab and etab[champ] is not none else defaut) }}{% endmacro %}
 <p><a href="/admin/etablissements">← Établissements</a></p>
 <h1>{{ etab.nom if etab else 'Nouvel établissement' }}</h1>
-{% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+{% if erreurs %}<div class="erreurs" role="alert"><ul>{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
 <form method="post" action="/admin/etablissements/enregistrer" class="feuille">
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
   {% if etab %}<input type="hidden" name="id" value="{{ etab.id }}">{% endif %}
@@ -32,6 +32,6 @@
   </div>
   {% with id_lat='latitude', id_lon='longitude', id_rayon='rayon_m' %}{% include "admin/_carte.html" %}{% endwith %}
   <label class="case champ"><input type="checkbox" name="actif" {{ 'checked' if (v.get('actif') == 'on') or (not v and (not etab or etab.actif)) }}><span>Établissement actif</span></label>
-  <button class="bouton" type="submit">Enregistrer</button>
+  <button class="bouton principal" type="submit">Enregistrer</button>
 </form>
 {% endblock %}

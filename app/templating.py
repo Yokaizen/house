@@ -17,6 +17,7 @@ from app.services.temps import (
     format_date,
     format_duree,
     format_heure,
+    format_heure_fr,
     libelle_mois,
     vers_local,
 )
@@ -24,7 +25,8 @@ from app.services.temps import (
 templates = Jinja2Templates(directory="app/templates")
 env = templates.env
 env.filters["duree"] = format_duree
-env.filters["heure"] = format_heure
+env.filters["heure"] = format_heure_fr
+env.filters["heure_saisie"] = format_heure
 env.filters["date_fr"] = format_date
 env.filters["date_iso"] = lambda dt: vers_local(dt).date().isoformat() if dt else ""
 env.globals.update(

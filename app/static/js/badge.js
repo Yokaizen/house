@@ -15,7 +15,9 @@
     var d = new Date();
     var h = document.getElementById("horloge");
     if (!h) return;
-    h.textContent = d.toLocaleTimeString("fr-FR", { timeZone: FUSEAU, hour: "2-digit", minute: "2-digit" });
+    // Format de la charte Proximy : « 7 h 30 ».
+    var hm = d.toLocaleTimeString("fr-FR", { timeZone: FUSEAU, hour: "numeric", minute: "2-digit" }).split(":");
+    h.textContent = Number(hm[0]) + " h " + hm[1];
     document.getElementById("date-jour").textContent = d.toLocaleDateString("fr-FR",
       { timeZone: FUSEAU, weekday: "long", day: "numeric", month: "long", year: "numeric" });
   }

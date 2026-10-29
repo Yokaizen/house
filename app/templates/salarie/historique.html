@@ -2,8 +2,8 @@
 {% from "partials/macros.html" import badgeage, alertes %}
 {% block titre %}Mes badgeages{% endblock %}
 {% block contenu %}
-<div class="actions" style="justify-content:space-between;margin-bottom:12px">
-  <h1 style="margin:0">Mes badgeages · {{ libelle_mois(annee, mois) }}</h1>
+<div class="entete-page">
+  <h1>Mes badgeages · {{ libelle_mois(annee, mois) }}</h1>
   <div class="actions">
     <a class="bouton secondaire petit" href="/mes-badgeages?mois={{ prec }}">← Mois précédent</a>
     {% if suiv %}<a class="bouton secondaire petit" href="/mes-badgeages?mois={{ suiv }}">Mois suivant →</a>{% endif %}
@@ -15,5 +15,5 @@
   {% include "partials/tableau_jours.html" %}
   </div>
 </div>
-<div class="actions"><a class="bouton" href="/oubli">J'ai oublié de badger</a></div>
+<div class="actions"><a class="bouton principal" href="/oubli">J'ai oublié de badger</a></div>
 {% endblock %}

@@ -27,7 +27,7 @@
     </div>
     <div class="champ"><label for="motif">Motif <span class="aide">Obligatoire. Exemple : téléphone déchargé, oubli.</span></label>
       <textarea id="motif" name="motif" required minlength="3" maxlength="1000">{{ v.get('motif', '') }}</textarea></div>
-    <div class="actions"><button class="bouton" type="submit">Enregistrer la saisie</button><a href="/">Annuler</a></div>
+    <div class="actions"><button class="bouton principal" type="submit">Enregistrer la saisie</button><a class="bouton secondaire" href="/">Annuler</a></div>
   </form>
 </div>
 {% endblock %}

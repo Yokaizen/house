@@ -1,5 +1,5 @@
-<nav class="actions" style="margin-bottom:16px">
+<nav class="onglets" aria-label="Administration">
   {% for url, lib in [('/admin/utilisateurs', 'Utilisateurs'), ('/admin/import', 'Import CSV'), ('/admin/etablissements', 'Établissements'), ('/admin/parametres', 'Paramètres'), ('/admin/audit', "Journal d'audit")] %}
-  <a class="bouton petit {{ '' if request.url.path.startswith(url) else 'secondaire' }}" href="{{ url }}">{{ lib }}</a>
+  <a href="{{ url }}" {{ 'aria-current="page"'|safe if request.url.path.startswith(url) }}>{{ lib }}</a>
   {% endfor %}
 </nav>

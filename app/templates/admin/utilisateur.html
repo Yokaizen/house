@@ -6,7 +6,7 @@
 {% macro val(champ, defaut='') %}{{ v[champ] if champ in v else (cible[champ] if cible and cible[champ] is not none else defaut) }}{% endmacro %}
 <p><a href="/admin/utilisateurs">← Utilisateurs</a></p>
 <h1>{{ cible.nom_complet if cible else 'Nouvel utilisateur' }}</h1>
-{% if erreurs %}<ul class="erreurs">{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+{% if erreurs %}<div class="erreurs" role="alert"><ul>{% for e in erreurs %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
 <form method="post" action="/admin/utilisateurs/enregistrer">
   <input type="hidden" name="csrf_token" value="{{ csrf }}">
   {% if cible %}<input type="hidden" name="id" value="{{ cible.id }}">{% endif %}
@@ -56,7 +56,7 @@
     </div>
     {% with id_lat='domicile_lat', id_lon='domicile_lon', id_rayon='domicile_rayon_m' %}{% include "admin/_carte.html" %}{% endwith %}
   </div>
-  <div class="actions"><button class="bouton" type="submit">Enregistrer</button></div>
+  <div class="actions"><button class="bouton principal" type="submit">Enregistrer</button></div>
 </form>
 
 {% if cible %}
@@ -73,7 +73,7 @@
     <form method="post" action="/admin/utilisateurs/{{ cible.id }}/supprimer" class="actions" style="margin-top:10px">
       <input type="hidden" name="csrf_token" value="{{ csrf }}">
       <input type="text" name="confirmation" placeholder="Recopiez le matricule {{ cible.matricule }}" style="max-width:280px" required>
-      <button class="bouton rose">Supprimer le compte et ses badgeages</button>
+      <button class="bouton danger">Supprimer le compte et ses badgeages</button>
     </form>
     <p class="discret">Pour un départ, préférez renseigner la date de sortie : la suppression sera automatique.</p>
   </details>

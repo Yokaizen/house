@@ -1,27 +1,44 @@
 {% extends "base.html" %}
-{% block titre %}Connexion{% endblock %}
-{% block classe_page %}etroit{% endblock %}
+{% block titre %}Se connecter{% endblock %}
+{% block classe_page %}page-centree{% endblock %}
 {% block contenu %}
-<div class="feuille">
+<div class="feuille carte-connexion">
   <p class="sur-titre">Espace salarié</p>
-  <h1>Connexion</h1>
+  <h1>Se connecter</h1>
   {% if erreur %}<div class="flash erreur" role="alert">{{ erreur }}</div>{% endif %}
   <form method="post" action="/connexion">
     <div class="champ">
-      <label for="identifiant">Matricule ou e-mail</label>
+      <label for="identifiant">Matricule ou adresse e-mail</label>
       <input id="identifiant" name="identifiant" type="text" autocomplete="username" required autofocus
              value="{{ identifiant or '' }}">
     </div>
     <div class="champ">
       <label for="mot_de_passe">Mot de passe</label>
-      <input id="mot_de_passe" name="mot_de_passe" type="password" autocomplete="current-password" required>
+      <div class="mdp">
+        <input id="mot_de_passe" name="mot_de_passe" type="password" autocomplete="current-password" required>
+        <button class="afficher" type="button" hidden aria-controls="mot_de_passe" aria-pressed="false">Afficher</button>
+      </div>
     </div>
     <div class="champ">
       <label class="case"><input type="checkbox" name="rester_connecte" checked>
         <span>Rester connecté sur cet appareil<span class="aide">Décochez sur un ordinateur partagé.</span></span></label>
     </div>
-    <button class="bouton" type="submit">Se connecter</button>
+    <button class="bouton principal pleine-largeur" type="submit">Se connecter</button>
   </form>
-  <p class="discret" style="margin-top:16px">Mot de passe oublié : contactez votre administrateur.</p>
+  <p class="reassurance">Mot de passe oublié : contactez votre administrateur, qui vous attribuera un mot de passe provisoire.</p>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var b = document.querySelector(".mdp .afficher"), c = document.getElementById("mot_de_passe");
+  b.hidden = false;
+  b.addEventListener("click", function () {
+    var visible = c.type === "password";
+    c.type = visible ? "text" : "password";
+    b.textContent = visible ? "Masquer" : "Afficher";
+    b.setAttribute("aria-pressed", visible);
+  });
+})();
+</script>
 {% endblock %}

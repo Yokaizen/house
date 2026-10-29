@@ -2,9 +2,9 @@
 {% block titre %}Utilisateurs{% endblock %}
 {% block contenu %}
 {% include "admin/_nav.html" %}
-<div class="actions" style="justify-content:space-between;margin-bottom:12px">
-  <h1 style="margin:0">Utilisateurs</h1>
-  <a class="bouton" href="/admin/utilisateurs/nouveau">Ajouter un utilisateur</a>
+<div class="entete-page">
+  <h1>Utilisateurs</h1>
+  <a class="bouton principal" href="/admin/utilisateurs/nouveau">Ajouter un utilisateur</a>
 </div>
 <form class="feuille filtres" method="get">
   <div class="champ"><label for="q">Recherche</label><input type="search" id="q" name="q" value="{{ f.q }}" placeholder="Nom, matricule, e-mail"></div>
