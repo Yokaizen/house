@@ -84,7 +84,7 @@ Les téléphones n'acceptent de donner leur position qu'à un site en HTTPS. Pou
 
 Pendant ce test, l'application est joignable depuis Internet par quiconque connaît l'adresse : n'y saisissez que des données fictives.
 
-Pour une répétition générale complète, le mieux est d'installer une copie de test sur le serveur de l'entreprise, avec une adresse du type `badge-test.proximy.net` (voir [DEPLOIEMENT.md](DEPLOIEMENT.md)).
+Pour une répétition générale complète, le mieux est d'installer une copie de test sur le serveur de l'entreprise, avec une adresse du type `badgeage-test.proximy.net` (voir [DEPLOIEMENT.md](DEPLOIEMENT.md)).
 
 ## 7. Arrêter, remettre à zéro, supprimer
 

@@ -3,7 +3,7 @@
 ## 1. Prérequis
 
 - Serveur Linux avec Docker Engine 24 ou plus récent et le plugin Docker Compose (`docker compose version`).
-- Un nom de domaine public (exemple : `badge.proximy.net`) pointant vers le serveur, ports 80 et 443 ouverts depuis Internet.
+- Un nom de domaine public (`badgeage.proximy.net`) pointant vers le serveur, ports 80 et 443 ouverts depuis Internet.
 - Le certificat d'entreprise pour ce domaine (certificat, chaîne intermédiaire et clé privée).
 - Accès sortant à `api-adresse.data.gouv.fr` pour localiser les adresses (facultatif : sinon, les positions se placent à la main sur la carte).
 - Côté navigateur des administrateurs : accès à `unpkg.com` et `tile.openstreetmap.org` pour afficher la carte.
@@ -20,7 +20,7 @@ cp .env.example .env
 | Variable | Valeur |
 |---|---|
 | `POSTGRES_PASSWORD` | mot de passe long et aléatoire (`openssl rand -hex 24`) |
-| `BASE_URL` | adresse publique, ex. `https://badge.proximy.net` |
+| `BASE_URL` | adresse publique, ex. `https://badgeage.proximy.net` |
 | `SMTP_*` | à remplir quand le serveur d'envoi sera disponible |
 | `HTTP_PORT` / `HTTPS_PORT` | à changer seulement si 80/443 sont déjà utilisés |
 
