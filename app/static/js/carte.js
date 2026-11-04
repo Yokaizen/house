@@ -16,7 +16,11 @@
     var lat = nombre(champLat), lon = nombre(champLon);
     carte = L.map("carte").setView(lat !== null ? [lat, lon] : [48.86, 2.35], lat !== null ? 16 : 9);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19, attribution: "&copy; contributeurs OpenStreetMap"
+      maxZoom: 19, attribution: "&copy; contributeurs OpenStreetMap",
+      // OpenStreetMap refuse les tuiles demandées sans en-tête Referer. L'application masque le
+      // Referer vers les autres sites (Referrer-Policy: same-origin) : on transmet ici le seul
+      // domaine de l'application, jamais l'adresse complète de la page.
+      referrerPolicy: "strict-origin-when-cross-origin"
     }).addTo(carte);
     if (lat !== null) placer(lat, lon, false);
     carte.on("click", function (e) { placer(e.latlng.lat, e.latlng.lng, true); });
