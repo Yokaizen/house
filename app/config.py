@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql+psycopg://badgeage:badgeage@db:5432/badgeage"
-    base_url: str = "https://badge.proximy.net"
+    base_url: str = "https://badgeage.proximy.net"
     timezone: str = "Europe/Paris"
 
     # Cookie de session : Secure obligatoire en production (HTTPS).
