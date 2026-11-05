@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import ROLES, Audit, Etablissement, Utilisateur
-from app.security import exiger_admin, fermer_toutes_sessions, hacher, mdp_temporaire, verifier_csrf
+from app.security import debloquer, exiger_admin, fermer_toutes_sessions, hacher, mdp_temporaire, verifier_csrf
 from app.services import parametres as P
 from app.services.audit import instantane, journaliser
 from app.services.geocodage import adresse_texte, geocoder
@@ -179,7 +179,7 @@ def reinitialiser_mdp(uid: int, request: Request, u: Utilisateur = Depends(exige
     mdp = mdp_temporaire()
     cible.mot_de_passe_hash = hacher(mdp)
     cible.doit_changer_mdp = True
-    cible.echecs_connexion, cible.bloque_jusqu_a = 0, None
+    debloquer(db, cible)
     fermer_toutes_sessions(db, cible.id)
     journaliser(db, u, "reinitialisation_mdp", "utilisateur", cible.id, None, None)
     db.commit()

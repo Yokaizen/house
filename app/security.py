@@ -1,27 +1,39 @@
 """Authentification (comptes locaux), sessions longues et protection CSRF."""
 import hashlib
 import hmac
+import logging
 import re
 import secrets
 import string
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 from fastapi import Depends, Request
-from sqlalchemy import or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db import get_db
-from app.models import SessionAuth, Utilisateur
+from app.models import SessionAuth, TentativeConnexion, Utilisateur
 from app.services.temps import maintenant_utc, vers_utc
+
+log = logging.getLogger(__name__)
 
 COOKIE = "badgeage_session"
 _hasher = PasswordHasher()
 
-MAX_ECHECS = 5
+# Limitation des tentatives de connexion, sur des fenêtres glissantes. Un compte
+# n'est bloqué pour toutes les adresses qu'après des échecs venus de plusieurs
+# adresses : quelqu'un qui connaît un matricule ne peut pas, à lui seul, empêcher
+# le salarié de se connecter depuis son téléphone.
+FENETRE = timedelta(minutes=15)
+MAX_ECHECS_IP = 10  # depuis une adresse, tous identifiants confondus
+MAX_ECHECS = 5  # depuis une adresse, pour un même identifiant
+FENETRE_COMPTE = timedelta(hours=1)
+MAX_ECHECS_COMPTE = 30  # pour un compte, toutes adresses confondues
 DUREE_BLOCAGE = timedelta(minutes=15)
+MESSAGE_BLOCAGE = "Trop de tentatives. Réessayez dans quelques minutes."
 
 
 class NonConnecte(Exception):
@@ -73,33 +85,64 @@ def erreurs_mdp(mdp: str) -> list[str]:
     return erreurs
 
 
+# --- Limitation des tentatives -----------------------------------------------
+
+def adresse_client(request: Request) -> str:
+    """Adresse IP du client. Derrière le proxy, uvicorn la lit dans X-Forwarded-For
+    (gunicorn --forwarded-allow-ips) : le proxy doit donc écraser cet en-tête, pas
+    le compléter, sans quoi le client choisirait l'adresse qui lui est comptée."""
+    return request.client.host if request.client else "inconnue"
+
+
+def _echecs(db: Session, depuis: datetime, **filtres) -> int:
+    requete = select(func.count()).select_from(TentativeConnexion).where(TentativeConnexion.horodatage >= depuis)
+    for colonne, valeur in filtres.items():
+        requete = requete.where(getattr(TentativeConnexion, colonne) == valeur)
+    return db.scalar(requete)
+
+
+def debloquer(db: Session, u: Utilisateur) -> None:
+    """Efface le blocage et les échecs de connexion d'un compte (réinitialisation par un administrateur)."""
+    u.bloque_jusqu_a = None
+    db.execute(delete(TentativeConnexion).where(TentativeConnexion.utilisateur_id == u.id))
+
+
 # --- Sessions ----------------------------------------------------------------
 
 def _empreinte(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def authentifier(db: Session, identifiant: str, mdp: str) -> tuple[Utilisateur | None, str | None]:
+def authentifier(db: Session, identifiant: str, mdp: str, ip: str) -> tuple[Utilisateur | None, str | None]:
     """Renvoie (utilisateur, None) si succès, (None, message) sinon."""
     identifiant = identifiant.strip()
+    cle = identifiant.lower()[:200]
+    maintenant = maintenant_utc()
+    if (_echecs(db, maintenant - FENETRE, adresse_ip=ip) >= MAX_ECHECS_IP
+            or _echecs(db, maintenant - FENETRE, adresse_ip=ip, identifiant=cle) >= MAX_ECHECS):
+        return None, MESSAGE_BLOCAGE
     u = db.scalar(select(Utilisateur).where(
-        or_(Utilisateur.matricule == identifiant, Utilisateur.email == identifiant.lower())))
-    message = "Identifiant ou mot de passe incorrect."
-    if u is None or not u.actif:
-        verifier_mdp(None, mdp)
-        return None, message
-    if u.bloque_jusqu_a and vers_utc(u.bloque_jusqu_a) > maintenant_utc():
-        return None, "Trop de tentatives. Réessayez dans quelques minutes."
-    if not verifier_mdp(u.mot_de_passe_hash, mdp):
-        u.echecs_connexion = (u.echecs_connexion or 0) + 1
-        if u.echecs_connexion >= MAX_ECHECS:
-            u.bloque_jusqu_a = maintenant_utc() + DUREE_BLOCAGE
-            u.echecs_connexion = 0
+        or_(Utilisateur.matricule == identifiant, Utilisateur.email == cle)))
+    if u is not None and u.bloque_jusqu_a and vers_utc(u.bloque_jusqu_a) > maintenant:
+        return None, MESSAGE_BLOCAGE
+    if u is None or not u.actif or not verifier_mdp(u.mot_de_passe_hash, mdp):
+        db.add(TentativeConnexion(horodatage=maintenant, adresse_ip=ip, identifiant=cle,
+                                  utilisateur_id=u.id if u else None))
+        db.flush()
+        if _echecs(db, maintenant - FENETRE, adresse_ip=ip) == MAX_ECHECS_IP:
+            log.warning("Connexions bloquées depuis %s : %s échecs en %s min", ip, MAX_ECHECS_IP,
+                        FENETRE.seconds // 60)
+        if u is not None and _echecs(db, maintenant - FENETRE_COMPTE, utilisateur_id=u.id) >= MAX_ECHECS_COMPTE:
+            u.bloque_jusqu_a = maintenant + DUREE_BLOCAGE
+            log.warning("Compte %s bloqué %s min : trop d'échecs de connexion depuis plusieurs adresses",
+                        u.matricule, DUREE_BLOCAGE.seconds // 60)
         db.commit()
-        return None, message
-    u.echecs_connexion = 0
+        return None, "Identifiant ou mot de passe incorrect."
+    # Les erreurs de saisie du salarié lui-même ne comptent plus ; celles venues d'ailleurs restent.
+    db.execute(delete(TentativeConnexion).where(TentativeConnexion.adresse_ip == ip,
+                                                TentativeConnexion.identifiant == cle))
     u.bloque_jusqu_a = None
-    u.derniere_connexion = maintenant_utc()
+    u.derniere_connexion = maintenant
     if _hasher.check_needs_rehash(u.mot_de_passe_hash):
         u.mot_de_passe_hash = hacher(mdp)
     db.commit()

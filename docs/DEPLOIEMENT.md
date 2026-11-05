@@ -93,7 +93,9 @@ Remplacez les fichiers dans `nginx/certs/`, puis : `docker compose restart nginx
 ## 5. Sécurité en place
 
 - HTTPS obligatoire (HSTS) ; cookies de session `HttpOnly`, `Secure`, `SameSite=Lax`.
-- Mots de passe hachés (Argon2), 10 caractères minimum, verrouillage de 15 minutes après 5 échecs.
+- Mots de passe hachés (Argon2), 10 caractères minimum.
+- Limitation des tentatives de connexion, sur 15 minutes glissantes : 5 échecs pour un même identifiant depuis une même adresse IP, ou 10 échecs depuis une même adresse, bloquent cette adresse. Le compte n'est bloqué pour toutes les adresses (15 minutes) qu'après 30 échecs en une heure, ce qui exige plusieurs adresses : un tiers qui connaît un matricule ne peut pas, seul, empêcher le salarié de se connecter. La réinitialisation du mot de passe par un administrateur lève le blocage.
+- L'adresse du client est lue dans `X-Forwarded-For`. Tout reverse proxy placé devant l'application doit **écraser** cet en-tête avec l'adresse qu'il reçoit (Nginx : `$remote_addr` ; Apache : `RequestHeader set X-Forwarded-For %{REMOTE_ADDR}s`), et le port de l'application ne doit être joignable que par ce proxy.
 - Jeton anti-CSRF sur tous les formulaires et appels de badgeage.
 - Sessions révoquées à la désactivation du compte ou à la réinitialisation du mot de passe.
 - Journal d'audit des corrections, imports, paramètres et comptes.

@@ -8,7 +8,7 @@ from sqlalchemy import delete, select
 
 from app.config import get_settings
 from app.db import SessionLocal
-from app.models import Audit, Parametre, Pointage, SessionAuth, Utilisateur
+from app.models import Audit, Parametre, Pointage, SessionAuth, TentativeConnexion, Utilisateur
 from app.services import parametres as P
 from app.services.audit import journaliser
 from app.services.mail import envoyer
@@ -42,12 +42,15 @@ def purger(db) -> None:
         db.query(Utilisateur).filter(Utilisateur.manager_id == u.id).update({"manager_id": None})
         db.execute(delete(Pointage).where(Pointage.utilisateur_id == u.id))
         db.execute(delete(SessionAuth).where(SessionAuth.utilisateur_id == u.id))
+        db.execute(delete(TentativeConnexion).where(TentativeConnexion.utilisateur_id == u.id))
         db.delete(u)
 
     limite = debut_jour_utc(_il_y_a_mois(regles["retention_pointages_mois"]))
     n = db.execute(delete(Pointage).where(Pointage.horodatage < limite)).rowcount
     db.execute(delete(Audit).where(Audit.horodatage < limite))
     db.execute(delete(SessionAuth).where(SessionAuth.expire_le < maintenant_utc()))
+    # Les échecs de connexion ne servent qu'à la limitation des tentatives (fenêtres d'une heure au plus).
+    db.execute(delete(TentativeConnexion).where(TentativeConnexion.horodatage < maintenant_utc() - timedelta(days=1)))
     if n:
         log.info("Purge : %s badgeage(s) antérieurs au %s supprimés", n, limite.date())
     db.commit()

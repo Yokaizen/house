@@ -95,7 +95,7 @@ class Utilisateur(Base):
 
     mot_de_passe_hash: Mapped[str | None] = mapped_column(String(255))
     doit_changer_mdp: Mapped[bool] = mapped_column(Boolean, default=True)
-    echecs_connexion: Mapped[int] = mapped_column(Integer, default=0)
+    # Blocage du compte pour toutes les adresses (voir TentativeConnexion).
     bloque_jusqu_a: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     derniere_connexion: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
@@ -136,6 +136,19 @@ class SessionAuth(Base):
     user_agent: Mapped[str | None] = mapped_column(String(300))
 
     utilisateur: Mapped[Utilisateur] = relationship()
+
+
+class TentativeConnexion(Base):
+    """Échec de connexion, conservé un jour pour limiter les tentatives
+    par adresse IP et par compte (app/security.py)."""
+    __tablename__ = "tentatives_connexion"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    horodatage: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=maintenant, index=True)
+    adresse_ip: Mapped[str] = mapped_column(String(45), index=True)
+    # Identifiant saisi, en minuscules : compté même s'il ne correspond à aucun compte.
+    identifiant: Mapped[str] = mapped_column(String(200))
+    utilisateur_id: Mapped[int | None] = mapped_column(ForeignKey("utilisateurs.id", ondelete="CASCADE"), index=True)
 
 
 class Pointage(Base):
