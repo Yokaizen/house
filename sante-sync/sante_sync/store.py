@@ -50,7 +50,7 @@ class Table:
     def _load(self) -> None:
         if not self.path.exists():
             return
-        with self.path.open(newline="", encoding="utf-8") as f:
+        with self.path.open(newline="", encoding="utf-8-sig") as f:
             for row in csv.DictReader(f):
                 k = row.get(self.key)
                 if k:
@@ -99,7 +99,7 @@ class Table:
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.path.with_name("." + self.path.name + ".tmp")
-        with tmp.open("w", newline="", encoding="utf-8") as f:
+        with tmp.open("w", newline="", encoding="utf-8-sig") as f:  # BOM : accents corrects dans Excel
             w = csv.DictWriter(f, fieldnames=self.columns, lineterminator="\n")
             w.writeheader()
             for k in sorted(self.rows):

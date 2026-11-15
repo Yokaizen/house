@@ -27,6 +27,7 @@ class Batch:
     daily: dict[date, dict] = field(default_factory=dict)
     workouts: list[dict] = field(default_factory=list)
     weights: list[dict] = field(default_factory=list)
+    ignored: set = field(default_factory=set)   # mesures reçues mais non reconnues
 
     def dates(self) -> set[date]:
         ds = set(self.daily)
@@ -139,6 +140,8 @@ def parse_json_obj(obj: dict) -> Batch:
                 row[col] = v
             continue
         if name not in METRICS:
+            if points:
+                batch.ignored.add(name)
             continue
         col, conv = METRICS[name]
         presum = _is_presummed(points)

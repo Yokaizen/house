@@ -28,7 +28,7 @@ def _setup_logging(verbose: bool) -> None:
 def tail(path: Path, n: int = 5) -> str:
     if not path.exists():
         return f"{path.name} : (absent)"
-    with path.open(encoding="utf-8", newline="") as f:
+    with path.open(encoding="utf-8-sig", newline="") as f:
         rows = list(csv.reader(f))
     if not rows:
         return f"{path.name} : (vide)"

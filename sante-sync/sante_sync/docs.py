@@ -16,8 +16,10 @@ PROFILE = {
         "Récupération et stress (FC au repos, variabilité cardiaque)",
     ],
     "weight": ("Pesées : balance connectée Xiaomi Mi (app Zepp, ex-Mi Fit) qui écrit dans Apple Santé "
-               "(source « Zepp ») ; anciennes pesées saisies à la main (iPhone, GymBook). Zepp ne transmet "
-               "aujourd'hui que poids et IMC : la masse grasse de la balance (impédance) n'arrive pas dans ces fichiers."),
+               "(sources « Zepp », « Zepp Life ») ; quelques pesées saisies à la main (iPhone, GymBook). Masse grasse et "
+               "masse maigre présentes seulement quand la balance a pu mesurer l'impédance (pieds nus) ; sinon "
+               "poids et IMC seuls. Plusieurs pesées à quelques secondes d'écart = remontées sur la balance : "
+               "prendre la dernière ou la moyenne."),
     "context": ("Rien de particulier signalé (pas de traitement agissant sur le cœur, pas de blessure). "
                 "La montre n'est en général **pas portée la nuit** : colonnes de sommeil vides la plupart du temps "
                 "(c'est normal, pas une panne), et FC au repos / VFC calculées sur les mesures de la journée. "
@@ -98,6 +100,7 @@ def agents(cfg: Config) -> str:
 - `frequence_respiratoire` (nuit), `spo2_pct`, `vo2max` (estimation Apple, ml/kg/min).
 - Sommeil de la **nuit qui se termine ce jour-là** : `sommeil_total_h`, `sommeil_leger_h` (« Core »), `sommeil_profond_h`, `sommeil_paradoxal_h` (REM), `eveil_nuit_h`, `au_lit_h`, `coucher`, `lever` (heure locale).
 - `nb_activites`, `minutes_activites`, `activites` (résumé des séances du jour).
+- Fichiers CSV en UTF-8 avec BOM (pour Excel) : lire avec l'encodage `utf-8-sig`.
 - `origine` : `hae` (export quotidien, référence) ou `export_apple` (recalculé depuis l'export complet, pour l'historique ancien ; sources dédoublonnées de façon approximative).
 
 ## Ne jamais modifier
@@ -109,7 +112,7 @@ def agents(cfg: Config) -> str:
 - Récupération : une **FC au repos qui monte** et une **VFC qui baisse** plusieurs jours de suite, par rapport à la moyenne des 30 jours, signalent fatigue, stress, maladie ou alcool.
 - Le jour courant est **incomplet** (pas, calories) tant que la journée n'est pas finie.
 - Poids : pesées à des heures variables (balance Xiaomi, parfois saisies à la main) ; comparer des moyennes hebdomadaires, idéalement les pesées du matin. Une variation de ±1 kg sur quelques jours est surtout de l'eau.
-- Composition corporelle : la balance Xiaomi est à impédance ; si sa masse grasse arrive un jour (colonne `masse_grasse_pct`), elle est **fiable en tendance, pas en valeur absolue** (dépend de l'hydratation, de l'heure, des repas).
+- Composition corporelle : la balance Xiaomi est à impédance ; sa masse grasse (`masse_grasse_pct`, `masse_maigre_kg`) est **fiable en tendance, pas en valeur absolue** (dépend de l'hydratation, de l'heure, des repas).
 - Sommeil : peu de nuits mesurées (montre rarement portée la nuit). Ne jamais conclure à un manque de sommeil à partir d'une case vide ; pour l'objectif « mieux dormir », s'appuyer sur les nuits mesurées et le signaler quand il y en a trop peu.
 - Sommeil : les phases (léger/profond/paradoxal) de l'Apple Watch sont des estimations ; la durée totale et la régularité de l'heure de coucher sont plus fiables.
 - Calories : estimations de l'appareil, à ±10-20 % ; utiles pour comparer des jours entre eux.

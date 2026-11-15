@@ -208,6 +208,8 @@ class AppleHealthSource(Source):
 
         lignes: dict[str, int] = {}
         bad = []
+        ignored: set[str] = set()
+        seen = {"jours": 0, "seances": 0, "pesees": 0}
         for f in todo:
             try:
                 batch = hae.parse_file(f)
@@ -216,6 +218,10 @@ class AppleHealthSource(Source):
                 continue
             _add(lignes, apply_batch(ctx.tables, batch))
             ledger.record(f, batch.dates())
+            ignored |= batch.ignored
+            seen["jours"] += len(batch.daily)
+            seen["seances"] += len(batch.workouts)
+            seen["pesees"] += len(batch.weights)
             if ctx.backfill:
                 progress["faits"].append(str(f))
                 if len(progress["faits"]) % 20 == 0:  # point de reprise
@@ -235,6 +241,9 @@ class AppleHealthSource(Source):
         res = Result(lignes=lignes, details={
             "dossiers": [str(d) for d in dirs], "fichiers_lus": len(todo), "fichiers_disponibles": len(files),
             "dernier_export_recu": newest_dt.isoformat(timespec="minutes"),
+            "elements_lus": seen,
+            # Utile si l'app change un nom : ces mesures sont reçues mais pas encore reprises dans les CSV.
+            "mesures_non_reconnues": sorted(ignored),
         })
         msgs = [f"{len(todo)} fichier(s) lu(s)"]
         if bad:
