@@ -71,7 +71,11 @@ def open_export(path: Path):
     path = Path(path)
     if path.suffix.lower() == ".zip":
         with zipfile.ZipFile(path) as z:
-            name = next((n for n in z.namelist() if n.endswith("export.xml") and "cda" not in n.lower()), None)
+            # « export.xml » (ou « exportation.xml » selon la langue de l'iPhone) ; à défaut, le plus gros .xml
+            xmls = [i for i in z.infolist() if i.filename.lower().endswith(".xml") and "cda" not in i.filename.lower()]
+            pref = [i for i in xmls if i.filename.lower().endswith(("export.xml", "exportation.xml"))]
+            pick = (pref or sorted(xmls, key=lambda i: i.file_size, reverse=True) or [None])[0]
+            name = pick.filename if pick else None
             if not name:
                 raise ValueError("export.xml introuvable dans l'archive")
             with z.open(name) as f:
@@ -86,7 +90,8 @@ def is_apple_export(path: Path) -> bool:
     if p.suffix.lower() == ".zip":
         try:
             with zipfile.ZipFile(p) as z:
-                return any(n.endswith("export.xml") for n in z.namelist())
+                return any(n.lower().endswith(".xml") and "apple_health_export" in n.lower() or
+                           n.lower().endswith(("export.xml", "exportation.xml")) for n in z.namelist())
         except zipfile.BadZipFile:
             return False
     if p.suffix.lower() == ".xml":
