@@ -97,8 +97,6 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if st is None:
             return 0
-        if a.verbeux:
-            print(json.dumps(st, indent=2, ensure_ascii=False))
         return 0 if st["resultat"] == "ok" else 1
 
     if a.cmd == "historique":

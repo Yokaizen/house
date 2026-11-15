@@ -22,6 +22,10 @@ IMPORT_DIR = "import_manuel"
 DONE_DIR = "integres"
 
 
+class NotYetConfigured(Exception):
+    """La source n'a jamais fonctionné et son dossier n'existe pas encore."""
+
+
 class SourceWarning(Exception):
     """La source a tourné mais quelque chose mérite votre attention."""
 
@@ -149,6 +153,7 @@ class Context:
     tables: dict[str, Table]
     backfill: bool = False
     today: date = field(default_factory=date.today)
+    previous_ok: dict = field(default_factory=dict)
 
 
 def hae_files(dirs: list[Path]) -> list[Path]:
@@ -178,7 +183,7 @@ class AppleHealthSource(Source):
             detect_hae_dirs(cfg.data_path.parent) or detect_hae_dirs())
         dirs = [d for d in dirs if d.exists()]
         if not dirs:
-            raise RuntimeError("Dossier de Health Auto Export introuvable dans iCloud Drive "
+            raise NotYetConfigured("Dossier de Health Auto Export introuvable dans iCloud Drive "
                                "(iCloud Drive → Auto Export). L'automatisation est-elle créée sur l'iPhone, "
                                "et iCloud pour Windows est-il ouvert ?")
         files = hae_files(dirs)
@@ -335,6 +340,14 @@ def _run_with_retries(src: Source, ctx: Context, delays: list[float]) -> Result:
             res = src.run(ctx)
             res.essais = i + 1
             return res
+        except NotYetConfigured as exc:
+            if not ctx.previous_ok.get(src.name):
+                # Jamais fonctionné : on attend l'installation côté iPhone, sans alerte ni nouvel essai.
+                return Result(etat="en_attente", message="En attente des premiers exports de l'iPhone. " + str(exc))
+            last_exc = exc
+            log.error("%s : essai %d/%d échoué : %s", src.name, i + 1, attempts, exc)
+            if i < len(delays):
+                time.sleep(delays[i])
         except Exception as exc:
             last_exc = exc
             log.error("%s : essai %d/%d échoué : %s", src.name, i + 1, attempts, exc)
@@ -372,9 +385,11 @@ def collect(cfg: Config, *, force: bool = False, backfill: bool = False,
 
     with Lock():
         tables = m.open_tables(data_dir)
-        ctx = Context(cfg=cfg, tables=tables, backfill=backfill)
         status_path = data_dir / "status.json"
         previous = _read_json(status_path, {})
+        ctx = Context(cfg=cfg, tables=tables, backfill=backfill,
+                      previous_ok={k: v.get("derniere_reussite_source")
+                                   for k, v in (previous.get("sources") or {}).items()})
         started = now_local()
         sources_status = {}
         for src in all_sources():
@@ -391,8 +406,11 @@ def collect(cfg: Config, *, force: bool = False, backfill: bool = False,
             entry = {
                 "libelle": src.label, "etat": res.etat, "message": res.message,
                 "lignes_mises_a_jour": res.lignes, "essais": res.essais,
-                "derniere_reussite": started.isoformat(timespec="seconds") if res.etat != "erreur"
+                "derniere_reussite": started.isoformat(timespec="seconds") if res.etat in ("ok", "avertissement")
                 else prev.get("derniere_reussite"),
+                # a déjà réellement fonctionné au moins une fois (sert à distinguer « pas encore installé »)
+                "derniere_reussite_source": started.isoformat(timespec="seconds") if res.etat in ("ok", "avertissement")
+                else prev.get("derniere_reussite_source"),
                 **res.details,
             }
             sources_status[src.name] = entry
@@ -400,7 +418,7 @@ def collect(cfg: Config, *, force: bool = False, backfill: bool = False,
             if res.etat in ("erreur", "avertissement"):
                 _notify_once(src, res)
 
-        overall = "ok" if all(s["etat"] == "ok" for s in sources_status.values()) else (
+        overall = "ok" if all(s["etat"] in ("ok", "en_attente") for s in sources_status.values()) else (
             "erreur" if all(s["etat"] == "erreur" for s in sources_status.values()) else "partiel")
         status = {
             "derniere_execution": started.isoformat(timespec="seconds"),

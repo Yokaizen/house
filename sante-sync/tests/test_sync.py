@@ -147,10 +147,33 @@ def test_failure_isolated_status_and_notification(env):
 
 def test_missing_folder_is_an_error_not_a_crash(env):
     cfg, icloud, tmp = env
+    # jamais installé côté iPhone : en attente, sans alerte ni nouvel essai
     st = engine.collect(cfg, force=True)
-    assert st["sources"]["apple_sante"]["etat"] == "erreur"
-    assert "introuvable" in st["sources"]["apple_sante"]["message"]
-    assert st["sources"]["import_manuel"]["etat"] == "ok"
+    a = st["sources"]["apple_sante"]
+    assert a["etat"] == "en_attente" and a["essais"] == 1 and "introuvable" in a["message"]
+    assert st["resultat"] == "ok" and not (tmp / "notifs.log").exists()
+    # une fois qu'il a fonctionné, un dossier disparu devient une vraie erreur
+    import shutil
+    fx.write_hae_tree(icloud, last_days(2))
+    assert engine.collect(cfg, force=True)["sources"]["apple_sante"]["etat"] == "ok"
+    shutil.rmtree(icloud / "Auto Export")
+    st = engine.collect(cfg, force=True)
+    assert st["sources"]["apple_sante"]["etat"] == "erreur" and st["sources"]["apple_sante"]["essais"] == 3
+    assert "introuvable" in (tmp / "notifs.log").read_text(encoding="utf-8")
+
+
+def test_docs_updated_until_customized(env):
+    from sante_sync import docs
+    cfg, icloud, tmp = env
+    docs.ensure_docs(cfg)
+    a = cfg.data_path / "AGENTS.md"
+    assert "Zepp" in a.read_text(encoding="utf-8")
+    a.write_text("ancien contenu\n" + docs.MARKER, encoding="utf-8")
+    docs.ensure_docs(cfg)
+    assert "Zepp" in a.read_text(encoding="utf-8")  # régénéré
+    a.write_text("# Mon fichier perso\n", encoding="utf-8")
+    docs.ensure_docs(cfg)
+    assert a.read_text(encoding="utf-8") == "# Mon fichier perso\n"  # respecté
 
 
 def test_stale_export_warns(env):

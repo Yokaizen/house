@@ -15,9 +15,14 @@ PROFILE = {
         "Forme et endurance (activité, VO2max, pas)",
         "Récupération et stress (FC au repos, variabilité cardiaque)",
     ],
-    "weight": "Pesées saisies à la main dans Apple Santé (pas de balance connectée : pas de masse grasse mesurée).",
-    "context": "Rien de particulier signalé (pas de traitement agissant sur le cœur, pas de blessure).",
-    "devices": "Apple Watch + iPhone (Apple Santé).",
+    "weight": ("Pesées : balance connectée Xiaomi Mi (app Zepp, ex-Mi Fit) qui écrit dans Apple Santé "
+               "(source « Zepp ») ; anciennes pesées saisies à la main (iPhone, GymBook). Zepp ne transmet "
+               "aujourd'hui que poids et IMC : la masse grasse de la balance (impédance) n'arrive pas dans ces fichiers."),
+    "context": ("Rien de particulier signalé (pas de traitement agissant sur le cœur, pas de blessure). "
+                "La montre n'est en général **pas portée la nuit** : colonnes de sommeil vides la plupart du temps "
+                "(c'est normal, pas une panne), et FC au repos / VFC calculées sur les mesures de la journée. "
+                "Il envisage de la porter la nuit : les nuits mesurées apparaîtront alors d'elles-mêmes."),
+    "devices": "Apple Watch + iPhone (Apple Santé) ; balance Xiaomi Mi via l'app Zepp.",
 }
 
 
@@ -83,7 +88,7 @@ def agents(cfg: Config) -> str:
 | `status.json` | Fraîcheur et santé de la collecte | — | script de collecte |
 | `apple_quotidien.csv` | Une ligne par jour : activité, cœur, sommeil, résumé des séances | `date` (AAAA-MM-JJ) | Apple Watch/iPhone → Apple Santé → Health Auto Export |
 | `apple_activites.csv` | Une ligne par séance (course, marche, vélo…) | `id` = heure de début | idem |
-| `apple_pesees.csv` | Une ligne par pesée | `id` = horodatage de la mesure | saisies manuelles dans Apple Santé |
+| `apple_pesees.csv` | Une ligne par pesée (deux pesées rapprochées = deux mesures réelles) | `id` = horodatage de la mesure | balance Xiaomi via Zepp → Apple Santé ; anciennes saisies manuelles |
 | `import_manuel/` | Dépôt d'exports téléchargés à la main ; vidé à chaque passage | — | propriétaire |
 
 ### Colonnes de `apple_quotidien.csv`
@@ -96,15 +101,16 @@ def agents(cfg: Config) -> str:
 - `origine` : `hae` (export quotidien, référence) ou `export_apple` (recalculé depuis l'export complet, pour l'historique ancien ; sources dédoublonnées de façon approximative).
 
 ## Ne jamais modifier
-`apple_quotidien.csv`, `apple_activites.csv`, `apple_pesees.csv`, `status.json` sont **réécrits chaque jour** : toute modification serait perdue. Pour une analyse, travailler sur une copie. `README.md` et `AGENTS.md` peuvent être enrichis par le propriétaire.
+`apple_quotidien.csv`, `apple_activites.csv`, `apple_pesees.csv`, `status.json` sont **réécrits chaque jour** : toute modification serait perdue. Pour une analyse, travailler sur une copie. `README.md` et `AGENTS.md` sont mis à jour par le programme ; le propriétaire peut les enrichir en supprimant d'abord la ligne de commentaire finale.
 
 ## Comment interpréter
 - **Case vide = donnée absente à la source** (montre non portée, pas de mesure). Ne jamais la traiter comme zéro ; l'exclure des moyennes.
 - Raisonner sur la **moyenne glissante sur 7 jours** et sa tendance sur 4 à 8 semaines, pas sur un jour isolé. Un jour seul (mauvaise nuit, FC au repos +5) n'est pas un signal.
 - Récupération : une **FC au repos qui monte** et une **VFC qui baisse** plusieurs jours de suite, par rapport à la moyenne des 30 jours, signalent fatigue, stress, maladie ou alcool.
 - Le jour courant est **incomplet** (pas, calories) tant que la journée n'est pas finie.
-- Poids : pesées manuelles, à des heures variables ; comparer des moyennes hebdomadaires, idéalement les pesées du matin. Une variation de ±1 kg sur quelques jours est surtout de l'eau.
-- Composition corporelle : si une balance à impédance est ajoutée un jour, sa masse grasse est **fiable en tendance, pas en valeur absolue** (dépend de l'hydratation, de l'heure, des repas).
+- Poids : pesées à des heures variables (balance Xiaomi, parfois saisies à la main) ; comparer des moyennes hebdomadaires, idéalement les pesées du matin. Une variation de ±1 kg sur quelques jours est surtout de l'eau.
+- Composition corporelle : la balance Xiaomi est à impédance ; si sa masse grasse arrive un jour (colonne `masse_grasse_pct`), elle est **fiable en tendance, pas en valeur absolue** (dépend de l'hydratation, de l'heure, des repas).
+- Sommeil : peu de nuits mesurées (montre rarement portée la nuit). Ne jamais conclure à un manque de sommeil à partir d'une case vide ; pour l'objectif « mieux dormir », s'appuyer sur les nuits mesurées et le signaler quand il y en a trop peu.
 - Sommeil : les phases (léger/profond/paradoxal) de l'Apple Watch sont des estimations ; la durée totale et la régularité de l'heure de coucher sont plus fiables.
 - Calories : estimations de l'appareil, à ±10-20 % ; utiles pour comparer des jours entre eux.
 - Ces données ne remplacent pas un avis médical : signaler sans alarmer, et suggérer un médecin si une tendance inquiétante persiste.
@@ -118,15 +124,24 @@ Une fois intégré, le fichier est rangé dans integres/. En cas d'échec, il re
 """
 
 
+MARKER = "<!-- Fichier généré : supprimez cette ligne pour que vos modifications ne soient plus remplacées. -->"
+
+
 def ensure_docs(cfg: Config, overwrite: bool = False) -> list[Path]:
     d = cfg.data_path
     d.mkdir(parents=True, exist_ok=True)
     (d / "import_manuel").mkdir(exist_ok=True)
     written = []
-    for name, content in (("README.md", readme(cfg)), ("AGENTS.md", agents(cfg)),
+    for name, content in (("README.md", readme(cfg) + "\n" + MARKER + "\n"),
+                          ("AGENTS.md", agents(cfg) + "\n" + MARKER + "\n"),
                           ("import_manuel/LISEZMOI.txt", IMPORT_README)):
         p = d / name
-        if overwrite or not p.exists():
+        old = p.read_text(encoding="utf-8") if p.exists() else None
+        # Mis à jour tant que le propriétaire ne l'a pas personnalisé (marqueur présent, ou
+        # première version sans marqueur jamais modifiée à la main).
+        auto = old is None or MARKER in old or (name.endswith(".md") and "## " in old and "Fichier généré" not in old
+                                                 and old.startswith(content.split("\n", 1)[0]))
+        if (overwrite or auto) and old != content:
             p.write_text(content, encoding="utf-8")
             written.append(p)
     return written
