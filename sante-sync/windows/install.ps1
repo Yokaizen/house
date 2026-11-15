@@ -138,7 +138,9 @@ Write-Host "  Une notification « Santé : test de notification » doit apparaî
 
 if (-not $SansCollecte) {
     Etape "Premier passage forcé"
-    & $Py -m sante_sync collecte --force
+    Write-Host "  (jusqu'à 3 minutes si une source ne répond pas : 3 essais espacés)"
+    $ErrorActionPreference = 'Continue'
+    & $Py -m sante_sync collecte --force -v | Out-Null
     & $Py -m sante_sync statut
 }
 
