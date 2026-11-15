@@ -101,7 +101,9 @@ def agents(cfg: Config) -> str:
 - Sommeil de la **nuit qui se termine ce jour-là** : `sommeil_total_h`, `sommeil_leger_h` (« Core »), `sommeil_profond_h`, `sommeil_paradoxal_h` (REM), `eveil_nuit_h`, `au_lit_h`, `coucher`, `lever` (heure locale).
 - `nb_activites`, `minutes_activites`, `activites` (résumé des séances du jour).
 - Fichiers CSV en UTF-8 avec BOM (pour Excel) : lire avec l'encodage `utf-8-sig`.
-- `origine` : `hae` (export quotidien, référence) ou `export_apple` (recalculé depuis l'export complet, pour l'historique ancien ; sources dédoublonnées de façon approximative).
+- `lumiere_jour_min` (temps passé à la lumière du jour, utile pour le sommeil), `minutes_debout`, `vitesse_marche_kmh`, `longueur_pas_cm`, `asymetrie_marche_pct`, `double_appui_pct` (marqueurs de mobilité mesurés par l'iPhone en poche), `effort_physique_met` (intensité moyenne, MET), `bruit_ambiant_db`, `bruit_casque_db`.
+- `origine` : `hae` (export quotidien de l'app, référence, à partir de mi-novembre 2026) ou `export_apple` (recalculé depuis l'export complet, historique ancien).
+- **Attention à la rupture de série** : sur les jours `export_apple`, pas et distance sont **sous-estimés de 2 à 10 %** (comparaison des jours présents dans les deux : 7 325 contre 7 674 pas, 8 105 contre 8 988). Ne pas interpréter le passage de `export_apple` à `hae` comme une hausse d'activité ; comparer des périodes de même origine. Les mesures cardiaques et les pesées sont identiques dans les deux.
 
 ## Ne jamais modifier
 `apple_quotidien.csv`, `apple_activites.csv`, `apple_pesees.csv`, `status.json` sont **réécrits chaque jour** : toute modification serait perdue. Pour une analyse, travailler sur une copie. `README.md` et `AGENTS.md` sont mis à jour par le programme ; le propriétaire peut les enrichir en supprimant d'abord la ligne de commentaire finale.

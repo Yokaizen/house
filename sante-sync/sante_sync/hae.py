@@ -54,6 +54,15 @@ METRICS = {
     "blood_oxygen_saturation": ("spo2_pct", m.to_pct),
     "oxygen_saturation": ("spo2_pct", m.to_pct),
     "vo2_max": ("vo2max", None),
+    "time_in_daylight": ("lumiere_jour_min", m.to_minutes),
+    "apple_stand_time": ("minutes_debout", m.to_minutes),
+    "walking_speed": ("vitesse_marche_kmh", m.to_kmh),
+    "walking_step_length": ("longueur_pas_cm", m.to_cm),
+    "walking_asymmetry_percentage": ("asymetrie_marche_pct", m.to_pct),
+    "walking_double_support_percentage": ("double_appui_pct", m.to_pct),
+    "physical_effort": ("effort_physique_met", None),
+    "environmental_audio_exposure": ("bruit_ambiant_db", None),
+    "headphone_audio_exposure": ("bruit_casque_db", None),
 }
 BODY = {
     "weight_body_mass": ("poids_kg", m.to_kg),

@@ -28,6 +28,9 @@ DAILY_COLUMNS = [
     "sommeil_total_h", "sommeil_leger_h", "sommeil_profond_h", "sommeil_paradoxal_h",
     "eveil_nuit_h", "au_lit_h", "coucher", "lever",
     "nb_activites", "minutes_activites", "activites",
+    "lumiere_jour_min", "minutes_debout", "vitesse_marche_kmh", "longueur_pas_cm",
+    "asymetrie_marche_pct", "double_appui_pct", "effort_physique_met",
+    "bruit_ambiant_db", "bruit_casque_db",
     "origine",
 ]
 DAILY_DECIMALS = {
@@ -37,6 +40,9 @@ DAILY_DECIMALS = {
     "frequence_respiratoire": 1, "spo2_pct": 1, "vo2max": 1,
     "sommeil_total_h": 2, "sommeil_leger_h": 2, "sommeil_profond_h": 2, "sommeil_paradoxal_h": 2,
     "eveil_nuit_h": 2, "au_lit_h": 2, "minutes_activites": 0,
+    "lumiere_jour_min": 0, "minutes_debout": 0, "vitesse_marche_kmh": 2, "longueur_pas_cm": 1,
+    "asymetrie_marche_pct": 1, "double_appui_pct": 1, "effort_physique_met": 2,
+    "bruit_ambiant_db": 1, "bruit_casque_db": 1,
 }
 
 WORKOUT_COLUMNS = [
@@ -128,6 +134,16 @@ def to_hours(v: float, unit: str | None) -> float:
     return {"hr": v, "h": v, "min": v / 60, "s": v / 3600}.get(u, v)
 
 
+def to_kmh(v: float, unit: str | None) -> float:
+    u = (unit or "km/hr").lower()
+    return {"mi/hr": v * 1.609344, "mph": v * 1.609344, "m/s": v * 3.6}.get(u, v)
+
+
+def to_cm(v: float, unit: str | None) -> float:
+    u = (unit or "cm").lower()
+    return {"in": v * 2.54, "m": v * 100, "ft": v * 30.48}.get(u, v)
+
+
 def to_pct(v: float, unit: str | None) -> float:
     # Apple stocke 0.97 ; certains exports écrivent 97.
     return v * 100 if v <= 1.0 else v
@@ -137,8 +153,10 @@ def to_pct(v: float, unit: str | None) -> float:
 
 # Champs cumulatifs (somme sur la journée) et moyennés.
 CUMULATIVE = {"pas", "distance_km", "etages", "calories_actives_kcal", "calories_repos_kcal",
-              "minutes_exercice", "heures_debout"}
-MEAN = {"fc_repos_bpm", "fc_moyenne_bpm", "fc_marche_bpm", "vfc_sdnn_ms", "frequence_respiratoire", "spo2_pct"}
+              "minutes_exercice", "heures_debout", "lumiere_jour_min", "minutes_debout"}
+MEAN = {"fc_repos_bpm", "fc_moyenne_bpm", "fc_marche_bpm", "vfc_sdnn_ms", "frequence_respiratoire", "spo2_pct",
+        "vitesse_marche_kmh", "longueur_pas_cm", "asymetrie_marche_pct", "double_appui_pct",
+        "effort_physique_met", "bruit_ambiant_db", "bruit_casque_db"}
 LAST = {"vo2max"}
 
 SLEEP_STAGES = {"core": "sommeil_leger_h", "deep": "sommeil_profond_h", "rem": "sommeil_paradoxal_h"}
